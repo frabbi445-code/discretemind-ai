@@ -1,7 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 
-# ১. পেজ সেটিংস ও শিরোনাম (কোনো কাস্টম CSS ঝামেলা ছাড়া)
+# ১. পেজ সেটিংস ও শিরোনাম
 st.set_page_config(page_title="DiscreteMind AI Ultra Pro", page_icon="🧮", layout="centered")
 
 st.title("🧮 DiscreteMind AI Ultra Pro")
@@ -39,7 +39,7 @@ topic = st.selectbox(
 )
 
 # ৫. ইন্টারঅ্যাক্টিভ কুইক-উদাহরণ বাটন
-st.write("💡 **স্মার্ট প্র্যাকটিস টুলস (যেকোনো একটি বাটনে ক্লিক করো):**")
+st.write("💡 **স্মার্ট প্র্যাকটিসツール (যেকোনো একটি বাটনে ক্লিক করো):**")
 col1, col2, col3 = st.columns(3)
 
 if 'input_val' not in st.session_state:
@@ -62,7 +62,7 @@ user_query = st.text_area(
     height=130
 )
 
-# লাইভ কাউন্টার মেট্রিক্স (কালারফুল ইন্টারেকশন)
+# লাইভ কাউন্টার মেট্রিক্স
 m_col1, m_col2 = st.columns(2)
 with m_col1:
     st.info(f"🔹 **ক্যারেক্টার সংখ্যা:** {len(user_query)}")
@@ -74,7 +74,7 @@ st.write("")
 # অ্যাকশন বাটনসমূহ
 btn_col1, btn_col2 = st.columns([4, 1])
 with btn_col1:
-    solve_btn = st.button("🚀 এক্সপার্ট এআই সリューション জেনারেট করো", use_container_width=True)
+    solve_btn = st.button("🚀 এক্সপার্ট এআই সলিউশন জেনারেট করো", use_container_width=True)
 with btn_col2:
     if st.button("🗑️ Reset", use_container_width=True):
         st.session_state.input_val = ""
@@ -88,9 +88,11 @@ if solve_btn:
         with st.spinner("🧠 এআই প্রফেসর নিখুঁতভাবে তোমার ম্যাথটি ধাপে ধাপে সলভ করছে..."):
             try:
                 genai.configure(api_key=SECURE_KEY)
+                
+                # 🛠️ এখানে মডেল নেম হিসেবে 'gemini-1.5-flash' ফিক্সড করা হয়েছে, যা এপিআই কনফ্লিক্ট দূর করবে
                 model = genai.GenerativeModel(
-                    model_name='models/gemini-1.5-flash',
-                    generation_config={"temperature": 0.15} # সর্বোচ্চ গাণিতিক নির্ভুলতার জন্য
+                    model_name='gemini-1.5-flash',
+                    generation_config={"temperature": 0.15}
                 )
                 
                 prompt = f"""
@@ -117,7 +119,7 @@ if solve_btn:
 
 st.write("---")
 
-# 🧠 ৬. কালারফুল সেলফ-টেস্ট কুইজ মডিউল
+# 🧠 ৬. সেলফ-টেস্ট কুইজ মডিউল
 st.subheader("🧠 Interactive Lab Quiz (Self-Test)")
 st.write("প্রেজেন্টেশনের সময় শিক্ষকদের ইমপ্রেস করার জন্য এই মডিউলটি ব্যবহার করো:")
 
