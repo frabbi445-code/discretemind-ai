@@ -1,40 +1,24 @@
 import streamlit as st
 import google.generativeai as genai
 
-# ১. প্রিমিয়াম থিম ও পেজ কনফিগারেশন
+# ১. পেজ সেটিংস ও শিরোনাম (কোনো কাস্টম CSS ঝামেলা ছাড়া)
 st.set_page_config(page_title="DiscreteMind AI Ultra Pro", page_icon="🧮", layout="centered")
 
-# কাস্টম কালারফুল সিএসএস স্টাইলিং (Presidency University CSE Theme)
-st.markdown("""
-    <style>
-    .main { background-color: #0f172a; }
-    h1 { color: #38bdf8; text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 800; padding-bottom: 0px; }
-    .sub { color: #94a3b8; text-align: center; font-size: 1.1rem; margin-bottom: 20px; }
-    .stButton>button { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 8px; font-weight: bold; width: 100%; padding: 14px; border: none; box-shadow: 0 4px 6px rgba(59,130,246,0.2); transition: all 0.3s ease; }
-    .stButton>button:hover { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(59,130,246,0.3); color: white; }
-    .result-card { background-color: #ffffff; padding: 25px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); color: #1e293b; }
-    .badge { background-color: #eff6ff; color: #1e40af; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; margin: 2px; border: 1px solid #bfdbfe; }
-    </style>
-""", unsafe_allowed_html=True)
+st.title("🧮 DiscreteMind AI Ultra Pro")
+st.subheader("Advanced Step-by-Step Discrete Mathematics Lab Solver")
+st.write("Presidency University | CSE Dept | AI Innovation Project")
+st.write("---")
 
-# ২. কালারফুল হেডার সেকশন
-st.markdown("<h1>🧮 DiscreteMind AI Ultra Pro</h1>", unsafe_allowed_html=True)
-st.markdown("<p class='sub'>Advanced Step-by-Step Discrete Mathematics Lab Solver</p>", unsafe_allowed_html=True)
+# ২. সাইডবার ডিজাইন (স্টুডেন্ট ইনফো কার্ড)
+st.sidebar.header("🎓 Lab Project Profile")
+with st.sidebar.container(border=True):
+    st.write("**Developer:** MD FAZLE RABBI SOHAN")
+    st.write("**Institution:** Presidency University")
+    st.write("**Department:** CSE")
+    st.write("**Course:** Discrete Mathematics")
+    st.caption("🚀 AI Powered | v2.0-Upgraded")
 
-# ৩. সাইডবার ডিজাইন (স্টুডেন্ট ইনফো ও কাস্টম ব্যাজ)
-st.sidebar.markdown("<h2 style='color: #1e3a8a;'>🎓 Lab Project Profile</h2>", unsafe_allowed_html=True)
-st.sidebar.markdown("""
-<div style='background-color: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;'>
-    <p><b>Developer:</b> MD FAZLE RABBI SOHAN</p>
-    <p><b>Institution:</b> Presidency University</p>
-    <p><b>Department:</b> CSE</p>
-    <p><b>Course:</b> Discrete Mathematics</p>
-    <span class='badge'>AI Powered</span>
-    <span class='badge'>v2.0-Upgraded</span>
-</div>
-""", unsafe_allowed_html=True)
-
-# ৪. এপিআই কি ১০০% সেফ এবং ফিক্সড সিকিউরড কনফিগারেশন
+# ৩. এপিআই কি ১০০% সেফ এবং ফিক্সড সিকিউরড কনফিগারেশন
 a = "AQ.Ab8RN"
 b = "6LuMWnU"
 c = "QaZOOfRQ"
@@ -44,20 +28,18 @@ f = "jlmYymtq"
 g = "n-eZgw"
 SECURE_KEY = f"{a}{b}{c}{d}{e}{f}{g}"
 
-st.write("---")
-
-# ৫. ইন্টারঅ্যাক্টিভ ড্রপডাউন মেনু
+# ৪. ইন্টারঅ্যাক্টিভ ড্রপডাউন মেনু
 topic = st.selectbox(
     "🎯 সলভ করার জন্য ডিসক্রিট ম্যাথ টপিকটি সিলেক্ট করো:", 
     [
         "📊 Truth Table & Propositional Logic (লজিক টেবিল)", 
-        "⭕ Set Theory (ইউনিয়ন, ইন্টারсеকশন ও ভেন ডায়াগ্রাম)", 
+        "⭕ Set Theory (ইউনিয়ন, ইন্টারসেকশন ও ভেন ডায়াগ্রাম)", 
         "🔢 Permutation & Combination (বিন্যাস ও সমাবেশ)"
     ]
 )
 
-# ৬. ইন্টারঅ্যাক্টিভ কুইক-উদাহরণ বাটন
-st.markdown("💡 **স্মার্ট প্র্যাকটিস টুলস (যেকোনো একটি বাটনে ক্লিক করো):**")
+# ৫. ইন্টারঅ্যাক্টিভ কুইক-উদাহরণ বাটন
+st.write("💡 **স্মার্ট প্র্যাকটিস টুলস (যেকোনো একটি বাটনে ক্লিক করো):**")
 col1, col2, col3 = st.columns(3)
 
 if 'input_val' not in st.session_state:
@@ -83,16 +65,16 @@ user_query = st.text_area(
 # লাইভ কাউন্টার মেট্রিক্স (কালারফুল ইন্টারেকশন)
 m_col1, m_col2 = st.columns(2)
 with m_col1:
-    st.markdown(f"🔹 **ক্যারেক্টার সংখ্যা:** `{len(user_query)}`")
+    st.info(f"🔹 **ক্যারেক্টার সংখ্যা:** {len(user_query)}")
 with m_col2:
-    st.markdown(f"🔹 **মোট শব্দ সংখ্যা:** `{len(user_query.split())}`")
+    st.info(f"🔹 **মোট শব্দ সংখ্যা:** {len(user_query.split())}")
 
 st.write("")
 
 # অ্যাকশন বাটনসমূহ
 btn_col1, btn_col2 = st.columns([4, 1])
 with btn_col1:
-    solve_btn = st.button("🚀 এক্সপার্ট এআই সলিউশন জেনারেট করো", use_container_width=True)
+    solve_btn = st.button("🚀 এক্সপার্ট এআই সリューション জেনারেট করো", use_container_width=True)
 with btn_col2:
     if st.button("🗑️ Reset", use_container_width=True):
         st.session_state.input_val = ""
@@ -127,17 +109,16 @@ if solve_btn:
                 response = model.generate_content(prompt)
                 
                 st.success("🎉 সমাধান সফলভাবে তৈরি হয়েছে!")
-                st.markdown("<div class='result-card'>", unsafe_allowed_html=True)
-                st.markdown(response.text)
-                st.markdown("</div>", unsafe_allowed_html=True)
+                with st.container(border=True):
+                    st.markdown(response.text)
                 
             except Exception as e:
-                st.error(f"❌ রান-টাইম এরর: {e}\n\nদয়া করে গিটহাব কমটি চেক করো বা কি-টি সচল আছে কি না নিশ্চিত করো।")
+                st.error(f"❌ রান-টাইম এরর: {e}\n\nদয়া করে গিটহাব কোড চেক করো বা কি-টি সচল আছে কি না নিশ্চিত করো।")
 
 st.write("---")
 
-# 🧠 ৭. কালারফুল সেলফ-টেস্ট কুইজ মডিউল
-st.markdown("<h3 style='color: #3b82f6;'>🧠 Interactive Lab Quiz (Self-Test)</h3>", unsafe_allowed_html=True)
+# 🧠 ৬. কালারফুল সেলফ-টেস্ট কুইজ মডিউল
+st.subheader("🧠 Interactive Lab Quiz (Self-Test)")
 st.write("প্রেজেন্টেশনের সময় শিক্ষকদের ইমপ্রেস করার জন্য এই মডিউলটি ব্যবহার করো:")
 
 st.info("❓ **প্রশ্ন:** If a set has 4 elements, how many elements are there in its Power Set?")
@@ -151,4 +132,4 @@ if ans_col3.button("Option C: 16টি (Correct)"):
     st.success("🎉 চমৎকার! সঠিক উত্তর। কারণ Power Set এর উপাদান সংখ্যা হলো 2^4 = 16।")
 
 st.write("---")
-st.markdown("<p style='text-align: center; color: #64748b; font-size: 0.85rem;'>Developed by MD FAZLE RABBI SOHAN | PU CSE Innovation Lab</p>", unsafe_allowed_html=True)
+st.caption("Developed by MD FAZLE RABBI SOHAN | PU CSE Innovation Lab")
