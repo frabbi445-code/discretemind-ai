@@ -1,18 +1,8 @@
 import streamlit as st
 import google.generativeai as genai
 
-# ১. পেজ সেটিংস ও আকর্ষণীয় সিএসই থিম ডিজাইন
+# ১. পেজ সেটিংস ও শিরোনাম
 st.set_page_config(page_title="DiscreteMind AI", page_icon="🧮", layout="centered")
-
-st.markdown("""
-    <style>
-    .main { background-color: #f8fafc; }
-    h1 { color: #1e3a8a; text-align: center; font-family: 'Arial'; font-weight: bold; }
-    .stButton>button { background-color: #1e3a8a; color: white; border-radius: 10px; font-weight: bold; width: 100%; padding: 12px; }
-    .stButton>button:hover { background-color: #1d4ed8; color: white; }
-    .card { background-color: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    </style>
-""", unsafe_allowed_html=True)
 
 st.title("🧮 DiscreteMind AI")
 st.subheader("Step-by-Step Discrete Mathematics Logic Solver")
@@ -28,7 +18,7 @@ topic = st.selectbox(
     "🔍 কোন ডিসক্রিট ম্যাথ টপিকটি সলভ করতে চাও?", 
     [
         "📊 Truth Table & Propositional Logic (লজিক টেবিল)", 
-        "⭕ Set Theory (ইউনিয়ন, ইন্টারসেকশন ও ভেন ডায়াগ্রাম)", 
+        "⭕ Set Theory (ইউনিয়ন, ইন্টারсеকশন ও ভেন ডায়াগ্রাম)", 
         "🔢 Permutation & Combination (বিন্যাস ও সমাবেশ)"
     ]
 )
@@ -73,10 +63,10 @@ if st.button("✨ সলভ করো (Solve step-by-step)"):
                 
                 response = model.generate_content(prompt)
                 
-                st.success("🎉 সমাধান তৈরি হয়ে গেছে!")
-                st.markdown("<div class='card'>", unsafe_allowed_html=True)
-                st.markdown(response.text)
-                st.markdown("</div>", unsafe_allowed_html=True)
+                st.success("🎉 समाधान তৈরি হয়ে গেছে!")
+                # এরর মুক্ত স্ট্যান্ডার্ড কন্টেইনারে আউটপুট প্রদর্শন
+                with st.container(border=True):
+                    st.markdown(response.text)
                 
             except Exception as e:
                 st.error(f"দুঃখিত, কোনো একটি কারিগরি সমস্যা হয়েছে: {e}")
