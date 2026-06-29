@@ -1,219 +1,203 @@
 import streamlit as st
 import time
-import plotly.graph_objects as go
-import numpy as np
 import pandas as pd
 import itertools
 import random
-import math  # লেটেস্ট পাইথন ফ্যাক্টোরিয়াল স্ট্যান্ডার্ডের জন্য
+import math
+import matplotlib.pyplot as plt
+from matplotlib_venn import venn2
 
-# ১. পেজ সেটিংস ও প্রিমিয়াম শিরোনাম
-st.set_page_config(page_title="DiscreteMind AI Ultra Pro", page_icon="🧮", layout="centered")
+# ১. পেজ সেটিংস ও প্রিমিয়াম থিম
+st.set_page_config(page_title="DiscreteMind AI Advanced", page_icon="🧮", layout="centered")
 
-st.title("🚀 DiscreteMind AI Ultra Pro")
-st.subheader("Advanced 3D-Enhanced Discrete Mathematics Course Project")
-st.write("Presidency University | CSE Dept | AI Innovation Project")
+st.title("🧮 DiscreteMind AI Pro: Advanced Math Lab")
+st.subheader("Dynamic Logic Parser, Set Venn Diagram & Infinite Quiz Engine")
+st.write("Presidency University | CSE Dept | Discrete Mathematics Project")
 st.write("---")
 
-# ২. সাইডবার ডিজাইন
+# ২. সাইডবার প্রোফাইল কার্ড
 st.sidebar.header("🎓 Course Project Profile")
 with st.sidebar.container(border=True):
     st.write("**Developer:** MD FAZLE RABBI SOHAN")
     st.write("**Institution:** Presidency University")
     st.write("**Department:** CSE")
     st.write("**Course:** Discrete Mathematics")
-    st.caption("🔥 Status: 100% Real-Time Math Engine (No API)")
+    st.caption("🔥 Engine: 100% Offline, Venn Graph & Conditional Logic Enabled")
 
 st.sidebar.write("---")
 st.sidebar.header("🔗 Quick Navigation")
 st.sidebar.page_link("https://presidency.edu.bd/", label="Presidency University Portal", icon="🏫")
 
-# ৩. ৩ডি অ্যানিমেটেড মডেল সেকশন
-st.write("### 🌐 Live 3D AI Topology Node Mesh (Presentation Mode)")
-st.caption("মাউস দিয়ে স্ক্রল করে ৩ডি মডেলটি জুম করো এবং ড্র্যাগ করে চারদিকে ঘুরিয়ে স্যারদের দেখাও:")
-
-n_nodes = 40
-x = np.random.standard_normal(n_nodes)
-y = np.random.standard_normal(n_nodes)
-z = np.random.standard_normal(n_nodes)
-
-fig = go.Figure(data=[go.Scatter3d(
-    x=x, y=y, z=z,
-    mode='markers+lines',
-    marker=dict(size=6, color=z, colorscale='Viridis', opacity=0.8),
-    line=dict(color='#38bdf8', width=1.5)
-)])
-
-fig.update_layout(margin=dict(l=0, r=0, b=0, t=0),
-                  scene=dict(xaxis=dict(showbackground=False, showticklabels=False, title=''),
-                             yaxis=dict(showbackground=False, showticklabels=False, title=''),
-                             zaxis=dict(showbackground=False, showticklabels=False, title='')),
-                  height=250)
-st.plotly_chart(fig, use_container_width=True)
-st.write("---")
-
-# ৪. ডিসক্রিট ম্যাথ টপিক সিলেকশন
-st.subheader("🧮 Real-Time Discrete Math Solver Engine")
+# ৩. টপিক সিলেকশন
+st.subheader("🚀 Real-Time Mathematical Engine")
 topic = st.selectbox(
-    "🎯 সলভ করার জন্য ডিসক্রিট ম্যাথ টপিকটি সিলেক্ট করো:", 
-    ["📊 Truth Table Generator (লাইভ ট্রুথ টেবিল ক্যালকুলেটর)", 
-     "⭕ Set Theory Calculator (রিয়েল-টাইম সেট সলভার)"]
+    "🎯 সলভ করার জন্য ডিসক্রিট ম্যাথ মডিউলটি সিলেক্ট করো:", 
+    ["📊 Advanced Truth Table Generator (ইম্প্লিকেশন ও বাই-কন্ডিশনাল সলভার)", 
+     "⭕ Set Theory Solver & Live Venn Diagram (ভেন ডায়াগ্রাম জেনারেটর)"]
 )
 
-# ৫. রিয়েল-টাইম সলভিং ইঞ্জিন লজিক
-if topic == "📊 Truth Table Generator (লাইভ ট্রুথ টেবিল ক্যালকুলেটর)":
-    st.info("💡 **নিয়ম:** লজিক এক্সপ্রেশনে ব্যবহার করো: `and`, `or`, `not` এবং ভেরিয়েবল হিসেবে বড় হাতের `P` ও `Q`।")
-    user_expr = st.text_input("📝 তোমার লজিক্যাল এক্সপ্রেশনটি লেখো:", value="P or (not Q)")
+# ৪. মডিউল ১: অ্যাডভান্সড লজিক সলভার (-> এবং <-> হ্যান্ডলিং)
+if topic == "📊 Advanced Truth Table Generator (ইম্প্লিকেশন ও বাই-কন্ডিশনাল সলভার)":
+    st.info("💡 **অ্যাডভান্সড লজিক গাইড:** তুমি এখন জটিল কন্ডিশনাল ম্যাথও সলভ করতে পারবে! লজিকে লেখো: `and`, `or`, `not` এবং ইম্প্লিকেশনের জন্য `->` ও বাই-কন্ডিশনালের জন্য `<->` ব্যবহার করো।")
+    user_expr = st.text_input("📝 তোমার লজিক্যাল এক্সপ্রেশনটি লেখো (যেমন: (P -> Q) and (not Q)):", value="(P -> Q) and (not Q)")
     
     if st.button("🚀 এক্সপার্ট সリューション জেনারেট করো", key="logic_btn"):
-        progress_bar = st.progress(0)
-        for p in range(10, 101, 30):
-            time.sleep(0.05)
-            progress_bar.progress(p)
-            
         try:
+            # কাস্টম পার্সার লজিক: -> এবং <-> কে পাইথন ফরম্যাটে কনভার্ট করা
+            parsed_expr = user_expr.replace("<->", " == ").replace("->", " <= ")
+            # দ্রষ্টব্য: পাইথনে P <= Q মানে হলো P implies Q (if P is True, Q must be True)
+            
             rows = []
             for P, Q in itertools.product([True, False], repeat=2):
                 env = {'P': P, 'Q': Q, 'and': lambda x, y: x and y, 'or': lambda x, y: x or y, 'not': lambda x: not x}
-                result = eval(user_expr, {"__builtins__": None}, env)
-                rows.append({"P": P, "Q": Q, "Result": result})
+                result = eval(parsed_expr, {"__builtins__": None}, env)
+                rows.append({"P": P, "Q": Q, "Result": bool(result)})
             
             df = pd.DataFrame(rows)
             st.balloons()
-            st.success("🎉 লজিক টেবিলটি রিয়েল-টাইমে সফলভাবে ক্যালকুলেট হয়েছে!")
+            st.success("🎉 কন্ডিশনাল লজিক টেবিলটি সফলভাবে ক্যালকুলেট হয়েছে!")
             
             with st.container(border=True):
                 st.markdown(f"### 📋 Evaluated Truth Table for: `{user_expr}`")
                 st.dataframe(df)
         except Exception as e:
-            st.error(f"❌ এক্সপ্রেশন সিনট্যাক্স ভুল হয়েছে! সঠিক ফরম্যাটে লেখো (যেমন: `P and Q`). এরর: {e}")
+            st.error(f"❌ এক্সপ্রেশন সিনট্যাক্স ভুল হয়েছে! ব্র্যাকেট বা লজিক অপারেটরগুলো ঠিক করুন। এরর: {e}")
 
-elif topic == "⭕ Set Theory Calculator (রিয়েল-টাইম সেট সলভার)":
-    st.info("💡 **নিয়ম:** কমা (,) দিয়ে আলাদা করে সেটের উপাদানগুলো লেখো।")
-    set_a_str = st.text_input("Set A এর উপাদানসমূহ লিখো:", "1, 3, 5, 7, 9")
-    set_b_str = st.text_input("Set B এর উপাদানসমূহ লিখো:", "2, 3, 5, 7")
+# 📂 মডিউল ২: ভেন ডায়াগ্রাম এবং সেট ক্যালকুলেটর
+elif topic == "⭕ Set Theory Solver & Live Venn Diagram (ভেন ডায়াগ্রাম জেনারেটর)":
+    st.info("💡 **নিয়ম:** কমা (,) দিয়ে উপাদানগুলো আলাদা করে লিখো। কোড রিয়েল-টাইমে সেট অপারেশনের হিসাব করে কাস্টম Venn Diagram ড্র করবে।")
     
-    if st.button("🚀 এক্সপার্ট সリューション ஜেনারেট করো", key="set_btn"):
+    col1, col2 = st.columns(2)
+    with col1:
+        set_a_str = st.text_input("Set A এর উপাদানসমূহ লিখো:", "1, 2, 3, 5, 7")
+    with col2:
+        set_b_str = st.text_input("Set B এর উপাদানসমূহ লিখো:", "3, 5, 7, 9, 11")
+        
+    if st.button("🚀 ক্যালকুলেট ও ভেন ডায়াগ্রাম ড্র করো", key="set_btn"):
         try:
             set_A = set([x.strip() for x in set_a_str.split(",") if x.strip()])
             set_B = set([x.strip() for x in set_b_str.split(",") if x.strip()])
             
+            union_set = set_A.union(set_B)
+            inter_set = set_A.intersection(set_B)
+            diff_A_B = set_A.difference(set_B)
+            diff_B_A = set_B.difference(set_A)
+            
             st.balloons()
-            st.success("🎉 সেট অপারেশনগুলো সফলভাবে সম্পন্ন হয়েছে!")
+            st.success("🎉 সেট অপারেশন এবং ভেন ডায়াগ্রাম জেনারেশন সফল হয়েছে!")
+            
+            # ভেন ডায়াগ্রাম ড্রয়িং লজিক (Matplotlib Integration)
+            fig, ax = plt.subplots(figsize=(5, 3.5))
+            # সাবসেটের মাপ নির্ধারণ (খালি থাকলে ০, উপাদান থাকলে সেটির দৈর্ঘ্য)
+            v = venn2(subsets=(len(diff_A_B), len(diff_B_A), len(inter_set)), set_labels=('Set A', 'Set B'), ax=ax)
+            
+            # ভেন ডায়াগ্রামের ভেতর লাইভ ডেটা লেবেল বসানো
+            if v.get_label_by_id('10'): v.get_label_by_id('10').set_text(", ".join(list(diff_A_B)) if diff_A_B else "Ø")
+            if v.get_label_by_id('01'): v.get_label_by_id('01').set_text(", ".join(list(diff_B_A)) if diff_B_A else "Ø")
+            if v.get_label_by_id('11'): v.get_label_by_id('11').set_text(", ".join(list(inter_set)) if inter_set else "Ø")
+            
+            plt.title("Live Generated Venn Diagram", fontsize=10, color="#4f46e5", weight="bold")
+            
+            # স্ক্রিনে গ্রাফ ও ডেটা শো করা
+            st.pyplot(fig)
             
             with st.container(border=True):
-                st.markdown("### 🎯 Set Operations Output")
-                st.write(f"🔹 **Set A:** `{set_A}`")
-                st.write(f"🔹 **Set B:** `{set_B}`")
-                st.write("---")
-                st.write(f"✅ **Union ($A \\cup B$):** `{set_A.union(set_B)}`")
-                st.write(f"✅ **Intersection ($A \\cap B$):** `{set_A.intersection(set_B)}`")
-                st.write(f"✅ **Difference ($A - B$):** `{set_A.difference(set_B)}`")
+                st.markdown("### 🎯 Mathematical Output")
+                st.write(f"✅ **Union ($A \\cup B$):** `{union_set if union_set else 'Ø'}`")
+                st.write(f"✅ **Intersection ($A \\cap B$):** `{inter_set if inter_set else 'Ø'}`")
+                st.write(f"✅ **Difference ($A - B$):** `{diff_A_B if diff_A_B else 'Ø'}`")
         except Exception as e:
-            st.error(f"❌ সেট ইনপুট ফরম্যাটে ভুল হয়েছে! এরর: {e}")
+            st.error(f"❌ সেট ইনপুট প্রসেস করতে সমস্যা হয়েছে। এরর: {e}")
 
 st.write("---")
 
-# 🧠 ৬. ডাইনামিক কুইজ ইঞ্জিন
-st.subheader("🧠 Dynamic Discrete Mathematics Course Quiz")
-st.caption("💡 এই কুইজের প্রশ্নগুলো সম্পূর্ণ ডাইনামিক। প্রতিবার নতুন সংখ্যা দিয়ে নতুন প্রশ্ন তৈরি হবে!")
+# 🧠 ৫. ফুল-ডাইনামিক ইনফিনিট কুইজ ইঞ্জিন (প্রশ্ন ও ভ্যালু প্রতিবার স্ক্র্যাচ থেকে চেঞ্জ হবে)
+st.subheader("🧠 Infinitely Variable Discrete Math Quiz")
+st.caption("💡 এই সেকশনের প্রশ্ন ও গাণিতিক ডেটা সম্পূর্ণ ডাইনামিক। 'রিসেট/চেঞ্জ করো' বাটনে চাপ দিলে সম্পূর্ণ নতুন ডেটা দিয়ে নতুন সেটআপ তৈরি হবে।")
 
-if 'q_bank' not in st.session_state or st.sidebar.button("🔄 কুইজের প্রশ্নসমূহ রিফ্রেশ/চেঞ্জ করো"):
-    n1 = random.randint(3, 6)
-    set_len = random.randint(3, 5)
-    men = random.randint(5, 8)
-    women = random.randint(4, 6)
-    
-    st.session_state.q_bank = [
-        {
-            "topic": "Set Theory",
-            "question": f"১. একটি সেটে যদি {set_len}টি উপাদান থাকে, তবে তার পাওয়ার সেটে কতটি উপাদান থাকবে?",
-            "options": [f"A) {set_len}টি", f"B) {2*set_len}টি", f"C) {2**set_len}টি"],
-            "correct": 2
-        },
-        {
-            "topic": "Propositional Logic",
-            "question": "২. প্রপোজিশনাল লজিকের নিয়ম অনুযায়ী, P ∧ Q (AND) কখন সত্য (True) আউটপুট দেয়?",
-            "options": ["A) যেকোনো একটি True হলে", "B) শুধুমাত্র যখন P এবং Q দুটিই True", "C) দুটিই False হলে"],
-            "correct": 1
-        },
-        {
-            "topic": "Permutation & Combination",
-            "question": f"৩. {n1} জন ছাত্রকে একটি সোজা লাইনে কত উপায়ে সাজানো (Permutation) সম্ভব?",
-            "options": [f"A) {n1} উপায়ে", f"B) {math.factorial(n1)} উপায়ে", f"C) {n1*2} উপায়ে"],
-            "correct": 1
-        },
-        {
-            "topic": "Propositional Logic",
-            "question": "৪. একটি কন্ডিশনাল স্টেটমেন্ট P → Q কখন মিথ্যা (False) প্রমাণিত হয়?",
-            "options": ["A) যখন P = True এবং Q = False", "B) যখন দুটিই True হয়", "C) যখন P = False এবং Q = True"],
-            "correct": 0
-        },
-        {
-            "topic": "Set Theory",
-            "question": f"৫. যদি ইউনিভার্সাল সেট U এর উপাদান সংখ্যা ১০ হয় এবং সেট A এর উপাদান সংখ্যা {set_len} হয়, তবে কমপ্লিমেন্ট সেট A' এর উপাদান সংখ্যা কত?",
-            "options": [f"A) {set_len}টি", f"B) {10 - set_len}টি", f"C) ১০টি"],
-            "correct": 1
-        },
-        {
-            "topic": "Permutation & Combination",
-            "question": f"৬. {men} জন পুরুষ এবং {women} জন মহিলার মধ্যে থেকে ২ জন পুরুষ ও ২ জন মহিলা কত উপায়ে বাছাই করা যাবে?",
-            "options": [f"A) {int((men*(men-1)/2) * (women*(women-1)/2))} উপায়ে", f"B) {men * women} উপায়ে", f"C) ২১টি উপায়ে"],
-            "correct": 0
-        }
-    ]
+# কুইজ ইনিশিয়ালাইজেশন এবং ফ্রেশ র্যান্ডম ডেটা জেনারেশন লজিক
+if 'quiz_seed' not in st.session_state or st.sidebar.button("🔄 কুইজের প্রশ্নসমূহ সম্পূর্ণ চেঞ্জ করো"):
+    st.session_state.quiz_seed = random.randint(1, 9999)
     st.session_state.current_q = 0
-    st.session_state.topic_scores = {"Propositional Logic": 0, "Set Theory": 0, "Permutation & Combination": 0}
+    st.session_state.topic_scores = {"Logic & Sets": 0, "Counting & Probability": 0}
     st.session_state.quiz_complete = False
 
+# সিড ব্যবহার করে ডাইনামিক মান তৈরি
+random.seed(st.session_state.quiz_seed)
+set_size = random.randint(3, 5)
+perm_elements = random.randint(4, 6)
+prob_men = random.randint(5, 7)
+prob_women = random.randint(3, 5)
+
+q_bank = [
+    {
+        "topic": "Logic & Sets",
+        "question": f"১. একটি সেটে উপাদান সংখ্যা (n) = {set_size} হলে, সেটটির মোট সাবসেট (Subsets) কতটি হবে?",
+        "options": [f"A) {set_size * 2}টি", f"B) {2**set_size}টি", f"C) {set_size**2}টি"],
+        "correct": 1
+    },
+    {
+        "topic": "Logic & Sets",
+        "question": "২. প্রপোজিশনাল লজিকে কন্ডিশনাল উক্তি P → Q কখন একমাত্র মিথ্যা (False) হয়?",
+        "options": ["A) যখন P সত্য এবং Q মিথ্যা", "B) যখন দুটি উক্তিই মিথ্যা হয়", "C) যখন P মিথ্যা এবং Q সত্য"],
+        "correct": 0
+    },
+    {
+        "topic": "Counting & Probability",
+        "question": f"৩. {perm_elements} জন প্রতিযোগীকে একটি গোল টেবিলে কত উপায়ে বিন্যস্ত (Circular Permutation) করা সম্ভব?",
+        "options": [f"A) {math.factorial(perm_elements)} উপায়ে", f"B) {math.factorial(perm_elements - 1)} উপায়ে", f"C) {perm_elements * 2} উপায়ে"],
+        "correct": 1
+    },
+    {
+        "topic": "Counting & Probability",
+        "question": f"৪. {prob_men} জন ছাত্র এবং {prob_women} জন ছাত্রীর মধ্য থেকে ১ জন ছাত্র ও ১ জন ছাত্রী কত উপায়ে নির্বাচন করা যাবে?",
+        "options": [f"A) {prob_men + prob_women} উপায়ে", f"B) {prob_men * prob_women} উপায়ে", f"C) {int(prob_men * (prob_men-1)/2)} উপায়ে"],
+        "correct": 1
+    }
+]
+
 if not st.session_state.quiz_complete:
-    q_index = st.session_state.current_q
-    current_topic = st.session_state.q_bank[q_index]['topic']
+    q_idx = st.session_state.current_q
+    cur_topic = q_bank[q_idx]['topic']
     
-    st.info(f"📋 প্রশ্ন: {q_index + 1} / 6 | 🏷️ টপিক: {current_topic}")
-    st.write(f"**{st.session_state.q_bank[q_index]['question']}**")
+    st.info(f"📋 প্রশ্ন নম্বর: {q_idx + 1} / 4 | 🏷️ ক্যাটাগরি: {cur_topic}")
+    st.write(f"**{q_bank[q_idx]['question']}**")
     
-    user_ans = st.radio("সর্বোত্তম উত্তরটি সিলেক্ট করো:", st.session_state.q_bank[q_index]['options'], key=f"dynamic_q_{q_index}")
+    user_ans = st.radio("সঠিক উত্তরটি বেছে নাও:", q_bank[q_idx]['options'], key=f"inf_q_{q_idx}_{st.session_state.quiz_seed}")
     
-    if st.button("উত্তর লক করো ও পরবর্তী প্রশ্ন ➡️"):
-        selected_index = st.session_state.q_bank[q_index]['options'].index(user_ans)
-        if selected_index == st.session_state.q_bank[q_index]['correct']:
-            st.session_state.topic_scores[current_topic] += 1
-            st.toast("🎉 সঠিক উত্তর!", icon="✅")
+    if st.button("উত্তর লক করো এবং এগিয়ে যাও ➡️"):
+        sel_idx = q_bank[q_idx]['options'].index(user_ans)
+        if sel_idx == q_bank[q_idx]['correct']:
+            st.session_state.topic_scores[cur_topic] += 1
+            st.toast("🎉 সঠিক উত্তর হয়েছে!", icon="✅")
         else:
             st.toast("❌ ভুল উত্তর!", icon="🚨")
             
-        if q_index + 1 < 6:
+        if q_idx + 1 < 4:
             st.session_state.current_q += 1
             st.rerun()
         else:
             st.session_state.quiz_complete = True
             st.rerun()
 else:
-    st.success("🎉 অভিনন্দন! তুমি ডাইনামিক কুইজ টেস্ট কমপ্লিট করেছ।")
+    st.success("🎉 চমৎকার! তুমি ডাইনামিক কুইজ পরীক্ষাটি সম্পন্ন করেছ।")
     total_score = sum(st.session_state.topic_scores.values())
     
     with st.container(border=True):
-        st.markdown("### 📊 Course Project Performance Report")
-        st.write(f"**টোটাল টেস্ট স্কোর:** `{total_score}` / `6`")
+        st.markdown("### 📊 Performance Analytics Report")
+        st.write(f"**অর্জিত মোট স্কোর:** `{total_score}` / `4`")
         st.write("---")
-        st.markdown("#### 🎯 Topic-wise Analytics & Feedback")
-        for topic_name, score in st.session_state.topic_scores.items():
-            status_color = "🔴 দুর্বল (Poor)" if score == 0 else "🟡 মাঝারি (Average)" if score == 1 else "🟢 দক্ষ (Excellent)"
-            st.write(f"🔹 **{topic_name}:** `{score}/2` -> **{status_color}**")
-            if score == 2: st.caption("💡 *ফিডব্যাক:* এই টপিকে তোমার বেসিক এবং গাণিতিক দক্ষতা চমৎকার!")
-            elif score == 1: st.caption("💡 *ফিডব্যাক:* তোমার কনসেপ্ট ঠিক আছে তবে আরেকটু প্র্যাকটিস দরকার।")
-            else: st.caption("💡 *ফিডব্যাক:* এই মডিউলে অনেক বেশি ভুল হচ্ছে। কোর্স লেকচার শিটগুলো আবার রিভিশন দাও।")
-            st.write("")
+        for t_name, score in st.session_state.topic_scores.items():
+            st.write(f"🔹 **{t_name}:** `{score}/2` সফলভাবে সম্পন্ন হয়েছে।")
         st.write("---")
-        if total_score == 6:
-            st.balloons()
-            st.info("🏅 **সার্টিফিকেট রিমার্ক:** পারফেক্ট স্কোর! তুমি একজন ডিসক্রিট ম্যাথ এক্সপার্ট।")
-        elif total_score >= 3: st.info("👍 **সার্টিফিকেট রিমার্ক:** ভালো পারফরম্যান্স। ফাইনালে চমৎকার রেজাল্ট আসবে।")
-        else: st.warning("📚 **সার্টিফিকেট রিমার্ক:** কোর্স কন্টেন্টগুলো ভালো করে রিভিশন দেওয়া প্রয়োজন।")
-
-    if st.button("🔄 কুইজ টেস্ট আবার শুরু করো"):
-        del st.session_state.q_bank
+        if total_score == 4: st.info("🏅 রিমার্ক: অসামান্য পারফরম্যান্স! তোমার ডিসক্রিট ম্যাথ বেসিকস অত্যন্ত শক্তিশালী।")
+        else: st.warning("📚 রিমার্ক: ভালো চেষ্টা! ল্যাব ফাইনালের জন্য টপিকগুলো আর একবার রিভিশন দাও।")
+        
+    if st.button("🔄 নতুন প্রশ্ন সেটে আবার পরীক্ষা দাও"):
+        st.session_state.quiz_seed = random.randint(1, 9999)
+        st.session_state.current_q = 0
+        st.session_state.topic_scores = {"Logic & Sets": 0, "Counting & Probability": 0}
+        st.session_state.quiz_complete = False
         st.rerun()
 
 st.write("---")
