@@ -53,25 +53,18 @@ if st.button("🚀 এক্সপার্ট এআই সリューション �
         for percent_complete in range(10, 101, 30):
             time.sleep(0.1)
             progress_bar.progress(percent_complete)
-            status_text.markdown(f"⚙️ **এআই ওমনি-পার্সার ম্যাথমেটিক্যাল লজিক প্রসেস করছে... {percent_complete}%**")
+            status_text.markdown(f"⚙️ **এআই ওমনি-পার্সার ম্যাথমেტიკ্যাল লজিক প্রসেস করছে... {percent_complete}%**")
             
         with st.spinner("✨ সমাধান একাডেমিক স্ট্যান্ডার্ডে ফরম্যাট করা হচ্ছে..."):
             try:
                 if GEMINI_API_KEY:
                     genai.configure(api_key=GEMINI_API_KEY)
                     
-                    # 🚀 ৪MD মডেল নট ফাউন্ড এরর দূর করার জন্য সেফ মাল্টি-মডেল ট্রাই লজিক
-                    try:
-                        model = genai.GenerativeModel(model_name='gemini-pro')
-                        prompt = f"You are an expert university professor in Discrete Mathematics. Provide a rigorous, step-by-step, textbook-style solution for: {user_query}. Use LaTeX formatting."
-                        response = model.generate_content(prompt)
-                        output_text = response.text
-                    except Exception:
-                        # ব্যাকআপ মডেল ২
-                        model = genai.GenerativeModel(model_name='gemini-1.5-pro')
-                        prompt = f"You are an expert university professor in Discrete Mathematics. Provide a rigorous, step-by-step, textbook-style solution for: {user_query}. Use LaTeX formatting."
-                        response = model.generate_content(prompt)
-                        output_text = response.text
+                    # ইউনিভার্সাল বেস মডেল সেটআপ যা ৪MD এরর দেবে না
+                    model = genai.GenerativeModel(model_name='gemini-pro')
+                    prompt = f"You are an expert university professor in Discrete Mathematics. Provide a rigorous, step-by-step, textbook-style solution for: {user_query}. Use LaTeX formatting."
+                    response = model.generate_content(prompt)
+                    output_text = response.text
                 else:
                     cleaned_q = user_query.lower()
                     if "isomorphic" in cleaned_q:
@@ -79,7 +72,7 @@ if st.button("🚀 এক্সপার্ট এআই সリューション �
                     else:
                         output_text = "\n⚠️ **System Note:** Please add your `GEMINI_API_KEY` in Streamlit Secrets to solve custom questions live."
             except Exception as e:
-                output_text = f"❌ Error connecting to Gemini API: {e}. Please check your API key version permissions."
+                output_text = f"❌ API Method Access Error: {e}. অনুগ্রহ করে নিশ্চিত করুন যে আপনার API key-টি সচল এবং সঠিক পারমিশনযুক্ত।"
             
             status_text.empty()
             progress_bar.empty()
@@ -144,7 +137,7 @@ questions_list = [
 
 if not st.session_state.test_submitted:
     with st.form("mock_test_form"):
-        st.info("⏱️ **পরীক্ষার নিয়মাবলী:** নিচে ৫টি প্রশ্ন দেওয়া আছে। প্রতিটি প্রশ্নের জন্য ১ মার্কস। ਨੇਗੇਟਿਵ ਮਾਰਕਿੰਗ নেই।")
+        st.info("⏱️ **পরীক্ষার নিয়মাবলী:** নিচে ৫টি প্রশ্ন দেওয়া আছে। প্রতিটি প্রশ্নের জন্য ১ মার্কস। নেগেটিভ মার্কিং নেই।")
         
         for q in questions_list:
             st.markdown(f"#### **{q['question']}**")
@@ -185,7 +178,7 @@ else:
     if score == 5:
         grade = "A+"
         color = "green"
-        feedback = "অসাধারণ পারফরম্যান্স! তোমার ডিসক্রিট ম্যাথ প্রিপারেশন ১০০% পারফেক্ট। ল্যাব ফাইনাল এবং থিওরিতে তুমি ফুল মার্কস পাচ্ছো। কিপ ইট আপ!"
+        feedback = "অসাধারণ পারফরম্যান্স! তোমার ডিসক্রিট ম্যাথ প্রিপারেশন ১০০% পারফেক্ট। ল্যাব ফাইনাল এবং থিওরিতে তুমি নির্ঘাত ফুল মার্কস পাচ্ছো। কিপ ইট আপ!"
     elif score >= 4:
         grade = "A"
         color = "blue"
@@ -197,7 +190,7 @@ else:
     else:
         grade = "F (Fail)"
         color = "red"
-        feedback = "অসন্তোষজনক স্কোর। ডিসক্রিট ম্যাথমেটিক্সের মূল থিওরিগুলো তোমার আরেকবার স্ক্র্যাচ থেকে পড়া উচিত। উপরের এআই সলভার ইঞ্জিন ব্যবহার করে প্র্যাকটিস করো।"
+        feedback = "অসস্তোষজনক স্কোর। ডিসক্রিট ম্যাথমেটিক্সের মূল থিওরিগুলো তোমার আরেকবার স্ক্র্যাচ থেকে পড়া উচিত। উপরের এআই সলভার ইঞ্জিন ব্যবহার করে প্র্যাকটিস করো।"
 
     with st.container(border=True):
         st.markdown(f"### 📊 Comprehensive Exam Report Card")
