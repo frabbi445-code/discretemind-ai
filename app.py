@@ -59,18 +59,27 @@ if st.button("🚀 এক্সপার্ট এআই সリューション �
             try:
                 if GEMINI_API_KEY:
                     genai.configure(api_key=GEMINI_API_KEY)
-                    model = genai.GenerativeModel(model_name='gemini-1.5-flash')
-                    prompt = f"You are an expert university professor in Discrete Mathematics. Provide a rigorous, step-by-step, textbook-style solution for: {user_query}. Use LaTeX formatting."
-                    response = model.generate_content(prompt)
-                    output_text = response.text
+                    
+                    # 🚀 ৪MD মডেল নট ফাউন্ড এরর দূর করার জন্য সেফ মাল্টি-মডেল ট্রাই লজিক
+                    try:
+                        model = genai.GenerativeModel(model_name='gemini-pro')
+                        prompt = f"You are an expert university professor in Discrete Mathematics. Provide a rigorous, step-by-step, textbook-style solution for: {user_query}. Use LaTeX formatting."
+                        response = model.generate_content(prompt)
+                        output_text = response.text
+                    except Exception:
+                        # ব্যাকআপ মডেল ২
+                        model = genai.GenerativeModel(model_name='gemini-1.5-pro')
+                        prompt = f"You are an expert university professor in Discrete Mathematics. Provide a rigorous, step-by-step, textbook-style solution for: {user_query}. Use LaTeX formatting."
+                        response = model.generate_content(prompt)
+                        output_text = response.text
                 else:
                     cleaned_q = user_query.lower()
-                    if "ali studies" in cleaned_q or "p->q" in cleaned_q:
-                        output_text = "\n### 📝 Given Data & Analysis\n* $P$: True, $Q$: False\n* Expression: $(P \\rightarrow Q) \\land \\neg Q$\n\n### 🛠️ Step-by-Step Derivation\n1. $P \\rightarrow Q = \\text{True} \\rightarrow \\text{False} = \\mathbf{False}$\n2. $\\neg Q = \\neg(\\text{False}) = \\mathbf{True}$\n3. $\\mathbf{False} \\land \\mathbf{True} = \\mathbf{False}$\n\n### 🎯 Final Conclusion\n> The final evaluated truth value is **False**."
+                    if "isomorphic" in cleaned_q:
+                        output_text = "\n### 📝 Given Data & Analysis\n* Graph 1 and Graph 2 have 4 vertices each.\n* All vertices have a degree of 2.\n\n### 🎯 Adjacency Matrices & Structural Invariants\nBoth graphs represent a cyclic graph of order 4 ($C_4$). Since a bijection exists preserving adjacency, the graphs are **Isomorphic**."
                     else:
                         output_text = "\n⚠️ **System Note:** Please add your `GEMINI_API_KEY` in Streamlit Secrets to solve custom questions live."
             except Exception as e:
-                output_text = f"❌ Error: {e}"
+                output_text = f"❌ Error connecting to Gemini API: {e}. Please check your API key version permissions."
             
             status_text.empty()
             progress_bar.empty()
@@ -81,11 +90,10 @@ if st.button("🚀 এক্সপার্ট এআই সリューション �
 
 st.write("---")
 
-# 🧠 ৫. অ্যাডভান্সড ডাইনামিক মক টেস্ট সিমুলেটর (Fixed KeyError)
+# 🧠 ৫. অ্যাডভান্সড ডাইনামিক মক টেস্ট সিমুলেটর
 st.subheader("📝 Discrete Mathematics Mid/Final Mock Test")
 st.caption("💡 এটি একটি প্রফেশনাল এক্সাম এনভায়রনমেন্ট। প্রশ্ন সিলেক্ট করে একদম শেষে 'সাবমিট মক টেস্ট' বাটনে চাপ দাও।")
 
-# KeyError স্থায়ীভাবে দূর করার জন্য সেশন স্টেট ইনিশিয়ালাইজেশন ফিক্স
 if 'mock_seed' not in st.session_state or st.sidebar.button("🔄 প্রশ্নপত্র নতুন করে জেনারেট করো"):
     st.session_state.mock_seed = random.randint(1, 9999)
     st.session_state.test_submitted = False
@@ -134,10 +142,9 @@ questions_list = [
     }
 ]
 
-# মক টেস্টের ফর্ম হ্যান্ডলিং
 if not st.session_state.test_submitted:
     with st.form("mock_test_form"):
-        st.info("⏱️ **পরীক্ষার নিয়মাবলী:** নিচে ৫টি প্রশ্ন দেওয়া আছে। প্রতিটি প্রশ্নের জন্য ১ মার্কস। নেগেティブ标记 নেই।")
+        st.info("⏱️ **পরীক্ষার নিয়মাবলী:** নিচে ৫টি প্রশ্ন দেওয়া আছে। প্রতিটি প্রশ্নের জন্য ১ মার্কস। ਨੇਗੇਟਿਵ ਮਾਰਕਿੰਗ নেই।")
         
         for q in questions_list:
             st.markdown(f"#### **{q['question']}**")
@@ -157,7 +164,6 @@ if not st.session_state.test_submitted:
             st.rerun()
 
 else:
-    # 🎯 ইভালুয়েশন ও অ্যানালিটিক্যাল ফিডব্যাক সেকশন
     st.success("🎉 তোমার উত্তরপত্র সফলভাবে মূল্যায়িত হয়েছে! নিচে লাইভ গ্রেড ও ফিডব্যাক রিপোর্ট দেওয়া হলো:")
     
     score = 0
@@ -179,7 +185,7 @@ else:
     if score == 5:
         grade = "A+"
         color = "green"
-        feedback = "অসাধারণ পারফরম্যান্স! তোমার ডিসক্রিট ম্যাথ প্রিপারেশন ১০০% পারফেক্ট। ল্যাব ফাইনাল এবং থিওরিতে তুমি নির্ঘাত ফুল মার্কস পাচ্ছো। কিপ ইট আপ!"
+        feedback = "অসাধারণ পারফরম্যান্স! তোমার ডিসক্রিট ম্যাথ প্রিপারেশন ১০০% পারফেক্ট। ল্যাব ফাইনাল এবং থিওরিতে তুমি ফুল মার্কস পাচ্ছো। কিপ ইট আপ!"
     elif score >= 4:
         grade = "A"
         color = "blue"
@@ -191,7 +197,7 @@ else:
     else:
         grade = "F (Fail)"
         color = "red"
-        feedback = "অসস্তোষজনক স্কোর। ডিসক্রিট ম্যাথমেটিক্সের মূল থিওরিগুলো তোমার আরেকবার স্ক্র্যাচ থেকে পড়া উচিত। উপরের এআই সলভার ইঞ্জিন ব্যবহার করে প্র্যাকটিস করো।"
+        feedback = "অসন্তোষজনক স্কোর। ডিসক্রিট ম্যাথমেটিক্সের মূল থিওরিগুলো তোমার আরেকবার স্ক্র্যাচ থেকে পড়া উচিত। উপরের এআই সলভার ইঞ্জিন ব্যবহার করে প্র্যাকটিস করো।"
 
     with st.container(border=True):
         st.markdown(f"### 📊 Comprehensive Exam Report Card")
@@ -221,4 +227,4 @@ else:
         st.rerun()
 
 st.write("---")
-st.caption
+st.caption("Developed by MD FAZLE RABBI SOHAN | PU CSE Innovation Lab")
