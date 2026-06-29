@@ -3,27 +3,61 @@ import google.generativeai as genai
 import time
 import pandas as pd
 import random
-import math
 
-# ১. পেজ সেটিংস ও প্রিমিয়াম থিম
-st.set_page_config(page_title="DiscreteMind AI Universal Pro", page_icon="🧠", layout="centered")
+# ১. পেজ সেটিংস ও কাস্টম নিওন কালারফুল থিম ইনজেকশন
+st.set_page_config(page_title="DiscreteMind AI Premium", page_icon="🧠", layout="centered")
+
+# কাস্টম CSS দিয়ে ব্যাকগ্রাউন্ড, বাটন ও কার্ড কালারফুল করা
+st.markdown("""
+    <style>
+    .stApp {
+        background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    }
+    h1 {
+        color: #00f2fe !important;
+        text-shadow: 0 0 10px #00f2fe;
+    }
+    h3 {
+        color: #4facfe !important;
+    }
+    .stButton>button {
+        background: linear-gradient(45deg, #00f2fe, #4facfe) !important;
+        color: #000000 !important;
+        font-weight: bold !important;
+        border: none !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 242, 254, 0.6);
+    }
+    div[data-testid="stForm"] {
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 2px solid #4facfe !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 st.title("🧠 DiscreteMind AI: Universal Course Solver")
-st.subheader("Omni-Topic Discrete Mathematics Engine & Mock Test Simulator")
-st.write("Presidency University | CSE Dept | Core Course Project")
+st.subheader("Omni-Topic Discrete Mathematics Engine & Interactive Exam Lab")
+st.write("Presidency University | CSE Dept | Premium UI Edition")
 st.write("---")
 
-# ২. প্রফেশনাল সাইডবার ড্যাশবোর্ড
-st.sidebar.header("🎓 Course Project Profile")
+# ২. প্রফেশনাল কালারফুল সাইডবার ড্যাশবোর্ড
+st.sidebar.markdown("<h2 style='color: #00f2fe;'>🎓 Student Profile</h2>", unsafe_allow_html=True)
 with st.sidebar.container(border=True):
     st.write("**Project Target:** Universal Math Solver & Mock Test")
     st.write("**Developer:** MD FAZLE RABBI SOHAN")
     st.write("**Institution:** Presidency University")
     st.write("**Department:** CSE")
-    st.caption("🔥 System Status: Full Mock Test Simulator Active")
+    st.markdown("<span style='color: #00ff87; font-weight: bold;'>🔥 Core AI Engine: Active</span>", unsafe_allow_html=True)
 
 st.sidebar.write("---")
-st.sidebar.header("🔗 Quick Navigation")
+st.sidebar.markdown("<h3 style='color: #4facfe;'>🔗 Quick Links</h3>", unsafe_allow_html=True)
 st.sidebar.page_link("https://presidency.edu.bd/", label="Presidency University Portal", icon="🏫")
 
 # ৩. স্ট্রিমলিট সিক্রেটস থেকে এপিআই কি রিড করা
@@ -33,13 +67,13 @@ except Exception:
     GEMINI_API_KEY = None
 
 # ৪. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস
-st.subheader("🚀 Universal Math Input Box")
-st.caption("💡 **কোনো টপিক সিলেক্ট করতে হবে না!** ট্রুথ টেবিল, সেট, গ্রাফ থিওরি, ট্রি, পারমিউটেশন, প্রব্যাবিলিটি, রিকুরেন্স রিলেশন বা ম্যাট্রিক্স—কোর্সের যেকোনো গাণিতিক প্রশ্ন নিচের বক্সে লেখো:")
+st.markdown("<h3 style='color: #00f2fe;'>🚀 Universal Math Input Box</h3>", unsafe_allow_html=True)
+st.caption("💡 ট্রুথ টেবিল, সেট, গ্রাফ থিওরি, ট্রি, পারমিউটেশন, প্রব্যাবিলিটি বা রিকুরেন্স রিলেশন—যেকোনো গাণিতিক প্রশ্ন নিচের বক্সে লেখো:")
 
 user_query = st.text_area(
     "📝 তোমার ডিসক্রিট ম্যাথের প্রশ্নটি এখানে টাইপ করো বা পেস্ট করো:",
     value="",
-    placeholder="যেমন: Prove that (P -> Q) and not Q implies not P.",
+    placeholder="যেমন: In a class of 50 students, 30 like C and 25 like Java...",
     height=120
 )
 
@@ -53,24 +87,18 @@ if st.button("🚀 এক্সপার্ট এআই সリューション �
         for percent_complete in range(10, 101, 30):
             time.sleep(0.1)
             progress_bar.progress(percent_complete)
-            status_text.markdown(f"⚙️ **এআই ওমনি-পার্সার ম্যাথমেტიკ্যাল লজিক প্রসেস করছে... {percent_complete}%**")
+            status_text.markdown(f"⚙️ **এআই ওমনি-পার্সার ম্যাথ অ্যানালাইসিস করছে... {percent_complete}%**")
             
         with st.spinner("✨ সমাধান একাডেমিক স্ট্যান্ডার্ডে ফরম্যাট করা হচ্ছে..."):
             try:
                 if GEMINI_API_KEY:
                     genai.configure(api_key=GEMINI_API_KEY)
-                    
-                    # ইউনিভার্সাল বেস মডেল সেটআপ যা ৪MD এরর দেবে না
-                    model = genai.GenerativeModel(model_name='gemini-pro')
-                    prompt = f"You are an expert university professor in Discrete Mathematics. Provide a rigorous, step-by-step, textbook-style solution for: {user_query}. Use LaTeX formatting."
+                    model = genai.GenerativeModel(model_name='gemini-2.5-flash')
+                    prompt = f"You are an expert university professor in Discrete Mathematics. Provide a rigorous, step-by-step, textbook-style solution for the student's query. Use clean and correct LaTeX formatting for matrices or formulas: {user_query}"
                     response = model.generate_content(prompt)
                     output_text = response.text
                 else:
-                    cleaned_q = user_query.lower()
-                    if "isomorphic" in cleaned_q:
-                        output_text = "\n### 📝 Given Data & Analysis\n* Graph 1 and Graph 2 have 4 vertices each.\n* All vertices have a degree of 2.\n\n### 🎯 Adjacency Matrices & Structural Invariants\nBoth graphs represent a cyclic graph of order 4 ($C_4$). Since a bijection exists preserving adjacency, the graphs are **Isomorphic**."
-                    else:
-                        output_text = "\n⚠️ **System Note:** Please add your `GEMINI_API_KEY` in Streamlit Secrets to solve custom questions live."
+                    output_text = "\n⚠️ **System Note:** Please add your `GEMINI_API_KEY` in Streamlit Secrets to solve custom questions live."
             except Exception as e:
                 output_text = f"❌ API Method Access Error: {e}. অনুগ্রহ করে নিশ্চিত করুন যে আপনার API key-টি সচল এবং সঠিক পারমিশনযুক্ত।"
             
@@ -83,9 +111,9 @@ if st.button("🚀 এক্সপার্ট এআই সリューション �
 
 st.write("---")
 
-# 🧠 ৫. অ্যাডভান্সড ডাইনামিক মক টেস্ট সিমুলেটর
-st.subheader("📝 Discrete Mathematics Mid/Final Mock Test")
-st.caption("💡 এটি একটি প্রফেশনাল এক্সাম এনভায়রনমেন্ট। প্রশ্ন সিলেক্ট করে একদম শেষে 'সাবমিট মক টেস্ট' বাটনে চাপ দাও।")
+# 🧠 ৫. আল্ট্রা-ইন্টারেক্টিভ ও কালারফুল মক টেস্ট সিমুলেটর (ক্লিন টেক্সট সংস্করণ)
+st.markdown("<h3 style='color: #00f2fe;'>📝 Interactive Mid/Final Mock Test</h3>", unsafe_allow_html=True)
+st.caption("💡 এটি একটি রিয়েল-টাইম এক্সাম ল্যাব। প্রশ্নগুলোর উত্তর সিলেক্ট করার সাথে সাথে তোমার লাইভ প্রগ্রেস বার আপডেট হবে।")
 
 if 'mock_seed' not in st.session_state or st.sidebar.button("🔄 প্রশ্নপত্র নতুন করে জেনারেট করো"):
     st.session_state.mock_seed = random.randint(1, 9999)
@@ -135,16 +163,24 @@ questions_list = [
     }
 ]
 
+# লাইভ প্রগ্রেস ট্র্যাকিং লজিক (ইন্টারেক্টিভিটি বাড়ানোর জন্য)
+answered_count = sum(1 for q in questions_list if st.session_state.answers.get(q['id']) is not None)
+completion_rate = answered_count / len(questions_list)
+
 if not st.session_state.test_submitted:
+    st.markdown(f"**📝 তোমার পরীক্ষার প্রগ্রেস:** {answered_count} / 5 টি প্রশ্নের উত্তর দিয়েছ")
+    st.progress(completion_rate)
+    
     with st.form("mock_test_form"):
-        st.info("⏱️ **পরীক্ষার নিয়মাবলী:** নিচে ৫টি প্রশ্ন দেওয়া আছে। প্রতিটি প্রশ্নের জন্য ১ মার্কস। নেগেটিভ মার্কিং নেই।")
+        st.markdown("<p style='color:#ff007f; font-weight:bold;'>⏱️ পরীক্ষার নিয়মাবলী: নিচে ৫টি প্রশ্ন দেওয়া আছে। প্রতিটি প্রশ্নের জন্য ১ মার্কস। কোনো নেগেটিভ মার্কিং নেই।</p>", unsafe_allow_html=True)
+        st.write("---")
         
         for q in questions_list:
             st.markdown(f"#### **{q['question']}**")
-            st.caption(f"🏷️ ক্যাটাগরি: {q['topic']} | মার্কস: ১.০০")
+            st.markdown(f"<span style='background-color:#1e293b; padding:4px 8px; border-radius:4px; color:#4facfe;'>🏷️ টপিক: {q['topic']}</span>", unsafe_allow_html=True)
             
             st.session_state.answers[q['id']] = st.radio(
-                "সঠিক উত্তরটি সিলেক্ট করো:", 
+                "সঠি উত্তরটি সিলেক্ট করো:", 
                 q['options'], 
                 key=f"mock_ans_{q['id']}_{st.session_state.mock_seed}"
             )
@@ -157,7 +193,8 @@ if not st.session_state.test_submitted:
             st.rerun()
 
 else:
-    st.success("🎉 তোমার উত্তরপত্র সফলভাবে মূল্যায়িত হয়েছে! নিচে লাইভ গ্রেড ও ফিডব্যাক রিপোর্ট দেওয়া হলো:")
+    # 🎯 ইভালুয়েশন ও প্রিমিয়াম অ্যানালিটিক্যাল ফিдব্যাক কার্ড
+    st.balloons()
     
     score = 0
     detailed_report = []
@@ -170,46 +207,38 @@ else:
         detailed_report.append({
             "প্রশ্ন": q['question'],
             "তোমার উত্তর": user_ans,
-            "সঠিক উত্তর": q['correct'],
-            "স্ট্যাটাস": "✅ সঠিক" if is_correct else "❌ ভুল"
+            "সymmetrical উত্তর": q['correct'],
+            "ফলাফল": "✅ সঠিক" if is_correct else "❌ ভুল"
         })
         
     success_rate = (score / 5) * 100
     if score == 5:
-        grade = "A+"
-        color = "green"
+        grade, color, bg_card = "A+", "#00ff87", "rgba(0, 255, 135, 0.1)"
         feedback = "অসাধারণ পারফরম্যান্স! তোমার ডিসক্রিট ম্যাথ প্রিপারেশন ১০০% পারফেক্ট। ল্যাব ফাইনাল এবং থিওরিতে তুমি নির্ঘাত ফুল মার্কস পাচ্ছো। কিপ ইট আপ!"
     elif score >= 4:
-        grade = "A"
-        color = "blue"
+        grade, color, bg_card = "A", "#00f2fe", "rgba(0, 242, 254, 0.1)"
         feedback = "খুব ভালো পারফরম্যান্স! মাইনর কিছু গ্যাপ ছাড়া তোমার বেসিক কনসেপ্ট বেশ পরিষ্কার। ভুল হওয়া প্রশ্নগুলো আরেকবার রিভিশন দিলে ল্যাবে চমৎকার এ-প্লাস নিশ্চিত।"
     elif score >= 2:
-        grade = "B"
-        color = "orange"
+        grade, color, bg_card = "B", "#ffaa00", "rgba(255, 170, 0, 0.1)"
         feedback = "মাঝারি পারফরম্যান্স। গ্রাফ থিওরি এবং লজিকের কিছু জায়গায় তোমার এখনও ঘাটতি রয়েছে। ল্যাব লেকচার শিটগুলো ভালোভাবে রিভিশন দেওয়ার পরামর্শ দেওয়া হলো।"
     else:
-        grade = "F (Fail)"
-        color = "red"
-        feedback = "অসস্তোষজনক স্কোর। ডিসক্রিট ম্যাথমেটিক্সের মূল থিওরিগুলো তোমার আরেকবার স্ক্র্যাচ থেকে পড়া উচিত। উপরের এআই সলভার ইঞ্জিন ব্যবহার করে প্র্যাকটিস করো।"
+        grade, color, bg_card = "F (Fail)", "#ff0055", "rgba(255, 0, 85, 0.1)"
+        feedback = "অসন্তোষজনক স্কোর। ডিসক্রিট ম্যাথমেটিক্সের মূল থিওরিগুলো তোমার আরেকবার স্ক্র্যাচ থেকে পড়া উচিত। পরীক্ষার আগে কোনো টপিক বুঝতে সমস্যা হলে উপরের এআই সলভার ইঞ্জিন ব্যবহার করে প্র্যাকটিস করো।"
 
-    with st.container(border=True):
-        st.markdown(f"### 📊 Comprehensive Exam Report Card")
-        st.write(f"**পরীক্ষার্থী:** MD FAZLE RABBI SOHAN")
-        
-        col_s1, col_s2, col_s3 = st.columns(3)
-        with col_s1:
-            st.metric(label="প্রাপ্ত নম্বর (Score)", value=f"{score} / 5")
-        with col_s2:
-            st.metric(label="সাফল্যের হার (Accuracy)", value=f"{int(success_rate)}%")
-        with col_s3:
-            st.markdown(f"<h4>ফাইনাল গ্রেড: <span style='color:{color}; font-weight:bold;'>{grade}</span></h4>", unsafe_allow_html=True)
-            
-        st.write("---")
-        st.markdown(f"🗣️ **একাডেমিক ফিডব্যাক ও গাইড:**")
-        st.info(feedback)
-        
-        st.write("---")
-        st.markdown("#### 📋 প্রশ্নভিত্তিক উত্তরপত্র পর্যালোচনা (Answer Review)")
+    # নিওন স্টাইলিশ রিপোর্ট কার্ড ড্যাশবোর্ড
+    st.markdown(f"""
+        <div style='background:{bg_card}; border:2px solid {color}; padding:20px; border-radius:12px; margin-bottom:25px;'>
+            <h3 style='color:{color}; margin-top:0;'>📊 Comprehensive Exam Report Card</h3>
+            <p style='font-size:16px; margin:5px 0;'><b>পরীক্ষার্থী:</b> MD FAZLE RABBI SOHAN</p>
+            <p style='font-size:16px; margin:5px 0;'><b>প্রাপ্ত স্কোর:</b> <span style='color:{color}; font-weight:bold;'>{score} / 5</span> ({int(success_rate)}% Accuracy)</p>
+            <p style='font-size:20px; margin:10px 0;'><b>ফাইনাল গ্রেড:</b> <span style='background:{color}; color:#000; padding:2px 10px; border-radius:4px; font-weight:bold;'>{grade}</span></p>
+            <hr style='border-color:{color}; opacity:0.3;'>
+            <p style='font-style:italic; margin-bottom:0;'><b>🗣️ একাডেমিক ফিডব্যাক ও গাইডলাইন:</b> {feedback}</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # বিস্তারিত রিভিউ টেবিল
+    with st.expander("🔍 প্রশ্নভিত্তিক উত্তরপত্র পর্যালোচনা (Detailed Answer Review)"):
         df_report = pd.DataFrame(detailed_report)
         st.dataframe(df_report, use_container_width=True)
 
@@ -220,4 +249,4 @@ else:
         st.rerun()
 
 st.write("---")
-st.caption("Developed by MD FAZLE RABBI SOHAN | PU CSE Innovation Lab")
+st.markdown("<p style='text-align: center; color: #4facfe;'>Developed by MD FAZLE RABBI SOHAN | PU CSE Innovation Lab</p>", unsafe_allow_html=True)
