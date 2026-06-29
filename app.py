@@ -5,7 +5,7 @@ import pandas as pd
 import random
 import math
 
-# ১. পেজ সেটিংস ও মিনিমালিস্ট ডার্ক নিওন থিম
+# ১. পেজ সেটিংস ও প্রিমিয়াম থিম
 st.set_page_config(page_title="DiscreteMind AI Universal Pro", page_icon="🧠", layout="centered")
 
 st.title("🧠 DiscreteMind AI: Universal Course Solver")
@@ -81,11 +81,11 @@ if st.button("🚀 এক্সপার্ট এআই সリューション �
 
 st.write("---")
 
-# 🧠 ৫. অ্যাডভান্সড ডাইনামিক মক টেস্ট সিমুলেটর (Mock Test Engine)
+# 🧠 ৫. অ্যাডভান্সড ডাইনামিক মক টেস্ট সিমুলেটর (Fixed KeyError)
 st.subheader("📝 Discrete Mathematics Mid/Final Mock Test")
 st.caption("💡 এটি একটি প্রফেশনাল এক্সাম এনভায়রনমেন্ট। প্রশ্ন সিলেক্ট করে একদম শেষে 'সাবমিট মক টেস্ট' বাটনে চাপ দাও।")
 
-# মক টেস্টের প্রশ্ন ব্যাংক ইনিশিয়ালাইজেশন (র্যান্ডমাইজড ভ্যালু সহ)
+# KeyError স্থায়ীভাবে দূর করার জন্য সেশন স্টেট ইনিশিয়ালাইজেশন ফিক্স
 if 'mock_seed' not in st.session_state or st.sidebar.button("🔄 প্রশ্নপত্র নতুন করে জেনারেট করো"):
     st.session_state.mock_seed = random.randint(1, 9999)
     st.session_state.test_submitted = False
@@ -107,3 +107,118 @@ questions_list = [
     {
         "id": 2,
         "topic": "Graph Theory",
+        "question": "২. ডিসক্রিট ম্যাথে একটি কানেক্টেড গ্রাফে যদি কোনো সাইকেল (Cycle) না থাকে, তবে তাকে কী বলা হয়?",
+        "options": ["Tree (বৃক্ষ)", "Complete Graph", "Bipartite Graph"],
+        "correct": "Tree (বৃক্ষ)"
+    },
+    {
+        "id": 3,
+        "topic": "Set Theory & Relations",
+        "question": f"৩. একটি সেটে উপাদান সংখ্যা {subset_n} হলে, সেটটির রিফ্লেক্সিভ রিলেশন (Reflexive Relations) এর সংখ্যা কতটি হবে?",
+        "options": [f"2^{subset_n * (subset_n - 1)}টি", f"2^{subset_n**2}টি", f"{2**subset_n}টি"],
+        "correct": f"2^{subset_n * (subset_n - 1)}টি"
+    },
+    {
+        "topic": "Set Theory & Relations",
+        "id": 4,
+        "question": "৪. যদি কোনো ফাংশন একই সাথে One-to-One এবং Onto হয়, তবে তাকে কী ধরণের ফাংশন বলা হয়?",
+        "options": ["Bijective Function", "Surjective Function", "Injective Function"],
+        "correct": "Bijective Function"
+    },
+    {
+        "topic": "Propositional Logic",
+        "id": 5,
+        "question": "৫. প্রপোজিশনাল লজিকের নিয়ম অনুযায়ী, একটি কন্ডিশনাল উক্তি P → Q কখন একমাত্র মিথ্যা (False) হয়?",
+        "options": ["যখন P সত্য এবং Q মিথ্যা", "যখন দুটি উক্তিই মিথ্যা হয়", "যখন P মিথ্যা এবং Q সত্য"],
+        "correct": "যখন P সত্য এবং Q মিথ্যা"
+    }
+]
+
+# মক টেস্টের ফর্ম হ্যান্ডলিং
+if not st.session_state.test_submitted:
+    with st.form("mock_test_form"):
+        st.info("⏱️ **পরীক্ষার নিয়মাবলী:** নিচে ৫টি প্রশ্ন দেওয়া আছে। প্রতিটি প্রশ্নের জন্য ১ মার্কস। নেগেティブ标记 নেই।")
+        
+        for q in questions_list:
+            st.markdown(f"#### **{q['question']}**")
+            st.caption(f"🏷️ ক্যাটাগরি: {q['topic']} | মার্কস: ১.০০")
+            
+            st.session_state.answers[q['id']] = st.radio(
+                "সঠিক উত্তরটি সিলেক্ট করো:", 
+                q['options'], 
+                key=f"mock_ans_{q['id']}_{st.session_state.mock_seed}"
+            )
+            st.write("---")
+            
+        submit_test = st.form_submit_button("📤 সাবমিট মক টেস্ট (Submit Exam)")
+        
+        if submit_test:
+            st.session_state.test_submitted = True
+            st.rerun()
+
+else:
+    # 🎯 ইভালুয়েশন ও অ্যানালিটিক্যাল ফিডব্যাক সেকশন
+    st.success("🎉 তোমার উত্তরপত্র সফলভাবে মূল্যায়িত হয়েছে! নিচে লাইভ গ্রেড ও ফিডব্যাক রিপোর্ট দেওয়া হলো:")
+    
+    score = 0
+    detailed_report = []
+    
+    for q in questions_list:
+        user_ans = st.session_state.answers.get(q['id'])
+        is_correct = user_ans == q['correct']
+        if is_correct:
+            score += 1
+        detailed_report.append({
+            "প্রশ্ন": q['question'],
+            "তোমার উত্তর": user_ans,
+            "সঠিক উত্তর": q['correct'],
+            "স্ট্যাটাস": "✅ সঠিক" if is_correct else "❌ ভুল"
+        })
+        
+    success_rate = (score / 5) * 100
+    if score == 5:
+        grade = "A+"
+        color = "green"
+        feedback = "অসাধারণ পারফরম্যান্স! তোমার ডিসক্রিট ম্যাথ প্রিপারেশন ১০০% পারফেক্ট। ল্যাব ফাইনাল এবং থিওরিতে তুমি নির্ঘাত ফুল মার্কস পাচ্ছো। কিপ ইট আপ!"
+    elif score >= 4:
+        grade = "A"
+        color = "blue"
+        feedback = "খুব ভালো পারফরম্যান্স! মাইনর কিছু গ্যাপ ছাড়া তোমার বেসিক কনসেপ্ট বেশ পরিষ্কার। ভুল হওয়া প্রশ্নগুলো আরেকবার রিভিশন দিলে ল্যাবে চমৎকার এ-প্লাস নিশ্চিত।"
+    elif score >= 2:
+        grade = "B"
+        color = "orange"
+        feedback = "মাঝারি পারফরম্যান্স। গ্রাফ থিওরি এবং লজিকের কিছু জায়গায় তোমার এখনও ঘাটতি রয়েছে। ল্যাব লেকচার শিটগুলো ভালোভাবে রিভিশন দেওয়ার পরামর্শ দেওয়া হলো।"
+    else:
+        grade = "F (Fail)"
+        color = "red"
+        feedback = "অসস্তোষজনক স্কোর। ডিসক্রিট ম্যাথমেটিক্সের মূল থিওরিগুলো তোমার আরেকবার স্ক্র্যাচ থেকে পড়া উচিত। উপরের এআই সলভার ইঞ্জিন ব্যবহার করে প্র্যাকটিস করো।"
+
+    with st.container(border=True):
+        st.markdown(f"### 📊 Comprehensive Exam Report Card")
+        st.write(f"**পরীক্ষার্থী:** MD FAZLE RABBI SOHAN")
+        
+        col_s1, col_s2, col_s3 = st.columns(3)
+        with col_s1:
+            st.metric(label="প্রাপ্ত নম্বর (Score)", value=f"{score} / 5")
+        with col_s2:
+            st.metric(label="সাফল্যের হার (Accuracy)", value=f"{int(success_rate)}%")
+        with col_s3:
+            st.markdown(f"<h4>ফাইনাল গ্রেড: <span style='color:{color}; font-weight:bold;'>{grade}</span></h4>", unsafe_allow_html=True)
+            
+        st.write("---")
+        st.markdown(f"🗣️ **একাডেমিক ফিডব্যাক ও গাইড:**")
+        st.info(feedback)
+        
+        st.write("---")
+        st.markdown("#### 📋 প্রশ্নভিত্তিক উত্তরপত্র পর্যালোচনা (Answer Review)")
+        df_report = pd.DataFrame(detailed_report)
+        st.dataframe(df_report, use_container_width=True)
+
+    if st.button("🔄 নতুন প্রশ্নপত্রে আবার মক টেস্ট দাও"):
+        st.session_state.mock_seed = random.randint(1, 9999)
+        st.session_state.test_submitted = False
+        st.session_state.answers = {}
+        st.rerun()
+
+st.write("---")
+st.caption
