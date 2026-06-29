@@ -15,7 +15,7 @@ st.subheader("Dynamic Logic Parser, Set Venn Diagram & Infinite Quiz Engine")
 st.write("Presidency University | CSE Dept | Discrete Mathematics Project")
 st.write("---")
 
-# ২. সাইডবার প্রোফাইল কার্ড
+# ২. সাইডবার প্রোফাইলカード
 st.sidebar.header("🎓 Course Project Profile")
 with st.sidebar.container(border=True):
     st.write("**Developer:** MD FAZLE RABBI SOHAN")
@@ -38,30 +38,34 @@ topic = st.selectbox(
 
 # ৪. মডিউল ১: অ্যাডভান্সড লজিক সলভার (-> এবং <-> হ্যান্ডলিং)
 if topic == "📊 Advanced Truth Table Generator (ইম্প্লিকেশন ও বাই-কন্ডিশনাল সলভার)":
-    st.info("💡 **অ্যাডভান্সড লজিক গাইড:** তুমি এখন জটিল কন্ডিশনাল ম্যাথও সলভ করতে পারবে! লজিকে লেখো: `and`, `or`, `not` এবং ইম্প্লিকেশনের জন্য `->` ও বাই-কন্ডিশনালের জন্য `<->` ব্যবহার করো।")
-    user_expr = st.text_input("📝 তোমার লজিক্যাল এক্সপ্রেশনটি লেখো (যেমন: (P -> Q) and (not Q)):", value="(P -> Q) and (not Q)")
+    st.info("💡 **অ্যাডভান্সড লজিক গাইড:** লজিক এক্সপ্রেশনে লেখো: `and`, `or`, `not` এবং ইম্প্লিকেশনের জন্য `->` ও বাই-কন্ডিশনালের জন্য `<->` ব্যবহার করো।")
+    
+    # ইনপুট বক্স একদম খালি ও ক্লিন রাখা হয়েছে
+    user_expr = st.text_input("📝 তোমার লজিক্যাল এক্সপ্রেশনটি এখানে টাইপ করো (যেমন: (P -> Q) and not P):", value="")
     
     if st.button("🚀 এক্সপার্ট সリューション জেনারেট করো", key="logic_btn"):
-        try:
-            # কাস্টম পার্সার লজিক: -> এবং <-> কে পাইথন ফরম্যাটে কনভার্ট করা
-            parsed_expr = user_expr.replace("<->", " == ").replace("->", " <= ")
-            # দ্রষ্টব্য: পাইথনে P <= Q মানে হলো P implies Q (if P is True, Q must be True)
-            
-            rows = []
-            for P, Q in itertools.product([True, False], repeat=2):
-                env = {'P': P, 'Q': Q, 'and': lambda x, y: x and y, 'or': lambda x, y: x or y, 'not': lambda x: not x}
-                result = eval(parsed_expr, {"__builtins__": None}, env)
-                rows.append({"P": P, "Q": Q, "Result": bool(result)})
-            
-            df = pd.DataFrame(rows)
-            st.balloons()
-            st.success("🎉 কন্ডিশনাল লজিক টেবিলটি সফলভাবে ক্যালকুলেট হয়েছে!")
-            
-            with st.container(border=True):
-                st.markdown(f"### 📋 Evaluated Truth Table for: `{user_expr}`")
-                st.dataframe(df)
-        except Exception as e:
-            st.error(f"❌ এক্সপ্রেশন সিনট্যাক্স ভুল হয়েছে! ব্র্যাকেট বা লজিক অপারেটরগুলো ঠিক করুন। এরর: {e}")
+        if not user_expr:
+            st.warning("⚠️ আগে একটি লজিক্যাল এক্সপ্রেশন ইনপুট দাও!")
+        else:
+            try:
+                # কাস্টম পার্সার লজিক
+                parsed_expr = user_expr.replace("<->", " == ").replace("->", " <= ")
+                
+                rows = []
+                for P, Q in itertools.product([True, False], repeat=2):
+                    env = {'P': P, 'Q': Q, 'and': lambda x, y: x and y, 'or': lambda x, y: x or y, 'not': lambda x: not x}
+                    result = eval(parsed_expr, {"__builtins__": None}, env)
+                    rows.append({"P": P, "Q": Q, "Result": bool(result)})
+                
+                df = pd.DataFrame(rows)
+                st.balloons()
+                st.success("🎉 কন্ডিশনাল লজিক টেবিলটি সফলভাবে ক্যালকুলেট হয়েছে!")
+                
+                with st.container(border=True):
+                    st.markdown(f"### 📋 Evaluated Truth Table for: `{user_expr}`")
+                    st.dataframe(df, use_container_width=True)
+            except Exception as e:
+                st.error(f"❌ এক্সপ্রেশন সিনট্যাক্স ভুল হয়েছে! ব্র্যাকেট বা লজিক অপারেটরগুলো ঠিক করুন। এরর: {e}")
 
 # 📂 মডিউল ২: ভেন ডায়াগ্রাম এবং সেট ক্যালকুলেটর
 elif topic == "⭕ Set Theory Solver & Live Venn Diagram (ভেন ডায়াগ্রাম জেনারেটর)":
@@ -69,53 +73,52 @@ elif topic == "⭕ Set Theory Solver & Live Venn Diagram (ভেন ডায়
     
     col1, col2 = st.columns(2)
     with col1:
-        set_a_str = st.text_input("Set A এর উপাদানসমূহ লিখো:", "1, 2, 3, 5, 7")
+        set_a_str = st.text_input("Set A এর উপাদানসমূহ লিখো (যেমন: 1, 2, 3):", value="")
     with col2:
-        set_b_str = st.text_input("Set B এর উপাদানসমূহ লিখো:", "3, 5, 7, 9, 11")
+        set_b_str = st.text_input("Set B এর উপাদানসমূহ লিখো (যেমন: 3, 4, 5):", value="")
         
     if st.button("🚀 ক্যালকুলেট ও ভেন ডায়াগ্রাম ড্র করো", key="set_btn"):
-        try:
-            set_A = set([x.strip() for x in set_a_str.split(",") if x.strip()])
-            set_B = set([x.strip() for x in set_b_str.split(",") if x.strip()])
-            
-            union_set = set_A.union(set_B)
-            inter_set = set_A.intersection(set_B)
-            diff_A_B = set_A.difference(set_B)
-            diff_B_A = set_B.difference(set_A)
-            
-            st.balloons()
-            st.success("🎉 সেট অপারেশন এবং ভেন ডায়াগ্রাম জেনারেশন সফল হয়েছে!")
-            
-            # ভেন ডায়াগ্রাম ড্রয়িং লজিক (Matplotlib Integration)
-            fig, ax = plt.subplots(figsize=(5, 3.5))
-            # সাবসেটের মাপ নির্ধারণ (খালি থাকলে ০, উপাদান থাকলে সেটির দৈর্ঘ্য)
-            v = venn2(subsets=(len(diff_A_B), len(diff_B_A), len(inter_set)), set_labels=('Set A', 'Set B'), ax=ax)
-            
-            # ভেন ডায়াগ্রামের ভেতর লাইভ ডেটা লেবেল বসানো
-            if v.get_label_by_id('10'): v.get_label_by_id('10').set_text(", ".join(list(diff_A_B)) if diff_A_B else "Ø")
-            if v.get_label_by_id('01'): v.get_label_by_id('01').set_text(", ".join(list(diff_B_A)) if diff_B_A else "Ø")
-            if v.get_label_by_id('11'): v.get_label_by_id('11').set_text(", ".join(list(inter_set)) if inter_set else "Ø")
-            
-            plt.title("Live Generated Venn Diagram", fontsize=10, color="#4f46e5", weight="bold")
-            
-            # স্ক্রিনে গ্রাফ ও ডেটা শো করা
-            st.pyplot(fig)
-            
-            with st.container(border=True):
-                st.markdown("### 🎯 Mathematical Output")
-                st.write(f"✅ **Union ($A \\cup B$):** `{union_set if union_set else 'Ø'}`")
-                st.write(f"✅ **Intersection ($A \\cap B$):** `{inter_set if inter_set else 'Ø'}`")
-                st.write(f"✅ **Difference ($A - B$):** `{diff_A_B if diff_A_B else 'Ø'}`")
-        except Exception as e:
-            st.error(f"❌ সেট ইনপুট প্রসেস করতে সমস্যা হয়েছে। এরর: {e}")
+        if not set_a_str or not set_b_str:
+            st.warning("⚠️ সেট A এবং সেট B উভয়ের উপাদান ইনপুট দাও!")
+        else:
+            try:
+                set_A = set([x.strip() for x in set_a_str.split(",") if x.strip()])
+                set_B = set([x.strip() for x in set_b_str.split(",") if x.strip()])
+                
+                union_set = set_A.union(set_B)
+                inter_set = set_A.intersection(set_B)
+                diff_A_B = set_A.difference(set_B)
+                diff_B_A = set_B.difference(set_A)
+                
+                st.balloons()
+                st.success("🎉 সেট অপারেশন এবং ভেন ডায়াগ্রাম জেনারেশন সফল হয়েছে!")
+                
+                # ভেন ডায়াগ্রাম ড্রয়িং লজিক
+                fig, ax = plt.subplots(figsize=(5, 3.5))
+                v = venn2(subsets=(len(diff_A_B), len(diff_B_A), len(inter_set)), set_labels=('Set A', 'Set B'), ax=ax)
+                
+                # লাইভ ডেটা লেবেল হ্যান্ডলিং
+                if v.get_label_by_id('10'): v.get_label_by_id('10').set_text(", ".join(list(diff_A_B)) if diff_A_B else "Ø")
+                if v.get_label_by_id('01'): v.get_label_by_id('01').set_text(", ".join(list(diff_B_A)) if diff_B_A else "Ø")
+                if v.get_label_by_id('11'): v.get_label_by_id('11').set_text(", ".join(list(inter_set)) if inter_set else "Ø")
+                
+                plt.title("Live Generated Venn Diagram", fontsize=10, color="#4f46e5", weight="bold")
+                st.pyplot(fig)
+                
+                with st.container(border=True):
+                    st.markdown("### 🎯 Mathematical Output")
+                    st.write(f"✅ **Union ($A \\cup B$):** `{union_set if union_set else 'Ø'}`")
+                    st.write(f"✅ **Intersection ($A \\cap B$):** `{inter_set if inter_set else 'Ø'}`")
+                    st.write(f"✅ **Difference ($A - B$):** `{diff_A_B if diff_A_B else 'Ø'}`")
+            except Exception as e:
+                st.error(f"❌ সেট ইনপুট প্রসেস করতে সমস্যা হয়েছে। এরর: {e}")
 
 st.write("---")
 
 # 🧠 ৫. ফুল-ডাইনামিক ইনফিনিট কুইজ ইঞ্জিন (প্রশ্ন ও ভ্যালু প্রতিবার স্ক্র্যাচ থেকে চেঞ্জ হবে)
 st.subheader("🧠 Infinitely Variable Discrete Math Quiz")
-st.caption("💡 এই সেকশনের প্রশ্ন ও গাণিতিক ডেটা সম্পূর্ণ ডাইনামিক। 'রিসেট/চেঞ্জ করো' বাটনে চাপ দিলে সম্পূর্ণ নতুন ডেটা দিয়ে নতুন সেটআপ তৈরি হবে।")
+st.caption("💡 এই সেকশনের প্রশ্ন ও গাণিতিক ডেটা সম্পূর্ণ ডাইনামিক। 'রিসেট/চেঞ্জ করো' বাটনে চাপ দিলে সম্পূর্ণ নতুন ডেটা তৈরি হবে।")
 
-# কুইজ ইনিশিয়ালাইজেশন এবং ফ্রেশ র্যান্ডম ডেটা জেনারেশন লজিক
 if 'quiz_seed' not in st.session_state or st.sidebar.button("🔄 কুইজের প্রশ্নসমূহ সম্পূর্ণ চেঞ্জ করো"):
     st.session_state.quiz_seed = random.randint(1, 9999)
     st.session_state.current_q = 0
