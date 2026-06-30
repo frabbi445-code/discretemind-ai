@@ -62,7 +62,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ২. Session State ইনিশিয়েলাইজেশন (স্টেট লস প্রোটেকশন)
+# ২. Session State ইনিশিয়েলাইজেশন
 if 'user_answers' not in st.session_state:
     st.session_state.user_answers = {}
 if 'exam_submitted' not in st.session_state:
@@ -80,7 +80,8 @@ with st.sidebar.container(border=True):
 st.sidebar.markdown("---")
 st.sidebar.markdown("<h3 style='color: #38bdf8;'>⚙️ AI Control Panel</h3>", unsafe_allow_html=True)
 
-default_key = "AQ.Ab8RN6J0BaZbZcJI1WUATFbacHHbfVvm6Q_NCNRA_VoAFvndgA"
+# তোমার পাঠানো একদম নতুন এপিআই টোকেন এখানে ডিফল্ট সেট করে দেওয়া হয়েছে
+default_key = "AQ.Ab8RN6JhpttHDgkKlcDOvkb35VRM9ualuW4whoynha1i1ALFhQ"
 
 custom_key_input = st.sidebar.text_input(
     "🔑 Custom API Key Override:", 
@@ -90,12 +91,11 @@ custom_key_input = st.sidebar.text_input(
 
 clean_key = str(custom_key_input).strip().replace('"', '').replace("'", "")
 
-# ৪. লাইভ হার্টবিট চেক লজিক (True Connection Status Engine)
+# ৪. লাইভ হার্টবিট চেক ও ট্রু কানেকশন গেটওয়ে
 ai_live_connected = False
 api_diagnostic_msg = ""
 
 if clean_key:
-    # ব্যাকএন্ডে গুগলের এন্ডপয়েন্টে একটা রিয়েল-টাইম লাইভ টেস্ট রিকোয়েস্ট পাঠানো হচ্ছে
     test_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent"
     test_headers = {'Content-Type': 'application/json'}
     if clean_key.startswith("AQ"):
@@ -110,19 +110,18 @@ if clean_key:
             ai_live_connected = True
             try:
                 genai.configure(api_key=clean_key)
-                model = genai.GenerativeModel('gemini-1.0-pro')
             except Exception:
                 pass
         else:
-            api_diagnostic_msg = f"Error {test_res.status_code}: Token Expired or Credentials Invalid."
-    except Exception as e:
+            api_diagnostic_msg = f"API Disabled/Expired (Status {test_res.status_code})"
+    except Exception:
         api_diagnostic_msg = "Network Gateway Timeout."
 
-# ট্রু-কানেকশন ডাইনামিক স্ট্যাটাস প্যানেল রেন্ডারিং
+# ট্রু-কানেকশন ডাইনামিক ইন্ডিকেটর প্যানেল
 if ai_live_connected:
-    st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE (Live Global Sync Active)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE (Live Cloud Channel Sync)</div>', unsafe_allow_html=True)
 else:
-    st.markdown(f'<div class="status-panel" style="background-color: rgba(244, 63, 94, 0.1); border: 1px solid #f43f5e; color: #f43f5e !important;">🔴 Core AI Engine: OFFLINE ({api_diagnostic_msg if api_diagnostic_msg else "Token Validation Pending"})</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="status-panel" style="background-color: rgba(244, 63, 94, 0.1); border: 1px solid #f43f5e; color: #f43f5e !important;">🔴 Core AI Engine: OFFLINE ({api_diagnostic_msg if api_diagnostic_msg else "Authentication Error"})</div>', unsafe_allow_html=True)
 
 def generate_ai_response(prompt_text):
     if not ai_live_connected:
@@ -132,7 +131,6 @@ def generate_ai_response(prompt_text):
         "contents": [{"parts": [{"text": prompt_text}]}],
         "generationConfig": {"temperature": 0.1, "maxOutputTokens": 2048}
     }
-    
     try:
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent"
         headers = {'Content-Type': 'application/json'}
@@ -141,7 +139,7 @@ def generate_ai_response(prompt_text):
         else:
             url += f"?key={clean_key}"
             
-        res = requests.post(url, headers=headers, json=payload, timeout=10)
+        res = requests.post(url, headers=headers, json=payload, timeout=5)
         if res.status_code == 200:
             return res.json()['candidates'][0]['content']['parts'][0]['text']
     except Exception:
@@ -184,7 +182,7 @@ if st.button("📊 Construct Truth Table", use_container_width=True):
 
 st.write("---")
 
-# 📊 ⑥. সিলেবাস অ্যানালিটিক্স প্যানেল
+# 📊 ⑥. Syllabus Weight Matrix
 st.markdown("<h3 style='color: #38bdf8;'>📊 Exam Analytics: Syllabus Weight Matrix</h3>", unsafe_allow_html=True)
 topic_data = {
     "Set Theory": {"importance": 15},
@@ -213,7 +211,7 @@ with col_chart:
 
 st.write("---")
 
-# 📚 ⑦. AI Lecture Slide Analyzer & Suggestion Engine (রেফারেন্স বুক সংযোজন)
+# 📚 ⑦. AI Lecture Slide Analyzer & Suggestion Engine (উইথ বুক রেফারেন্স ও অফিশিয়াল লিঙ্ক)
 st.markdown("<h3 style='color: #38bdf8;'>📚 AI Lecture Slide Analyzer & Suggestion Engine</h3>", unsafe_allow_html=True)
 uploaded_file = st.file_uploader("📂 Choose a Lecture Slide File:", type=["txt", "pdf"])
 
@@ -236,7 +234,7 @@ if uploaded_file is not None:
 ---
 #### 📖 Standard Textbook Reference:
 * **Book:** *Discrete Mathematics and Its Applications* by Kenneth H. Rosen (7th Edition).
-* **Reference Link:** [Open Access Textbook Resources](https://www.mheducation.com)"""
+* **Reference Link:** [Official McGraw-Hill Portal](https://www.mheducation.com)"""
             st.markdown('<div class="answer-box">', unsafe_allow_html=True)
             st.markdown(explanation)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -252,7 +250,7 @@ if uploaded_file is not None:
 ---
 #### 📖 Suggested Reading Mapping:
 * **Book:** *Discrete Mathematics* by Seymour Lipschutz (Schaum's Outlines).
-* **Reference Link:** [McGraw-Hill Education Portal](https://www.mheducation.com)"""
+* **Reference Link:** [McGraw-Hill Education Catalog](https://www.mheducation.com)"""
             st.markdown('<div class="answer-box">', unsafe_allow_html=True)
             st.markdown(suggestions)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -306,7 +304,7 @@ $$r^2 - c_1r - c_2 = 0$$
 
 if st.button("Generate Detailed AI Lecture Note", use_container_width=True):
     with st.spinner(f"✨ Compiling notes for {lesson_topic}..."):
-        content = generate_ai_response(f"Write a 50 line lecture note with textbook reference book name and official link at the end for: {lesson_topic}")
+        content = generate_ai_response(f"Write a lecture note with textbook reference book name and official link at the end for: {lesson_topic}")
         if not content:
             content = global_lessons.get(lesson_topic, "### Data Layer Ready.")
         st.markdown('<div class="answer-box">', unsafe_allow_html=True)
@@ -345,7 +343,7 @@ if st.button("🔄 Load Dynamic AI Flashcards", use_container_width=True):
 
 st.write("---")
 
-# 🚀 ১০. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস (ম্যাথ সলভার - শতভাগ ডাইনামিক অটো-অ্যানসার)
+# 🚀 ১০. Universal Math Input Box
 st.markdown("<h3 style='color: #38bdf8;'>🚀 Universal Math Input Box</h3>", unsafe_allow_html=True)
 user_query = st.text_area("📝 Type your discrete math problem here:", placeholder="e.g., If set A has 3 elements, how many elements are in P(A)?", height=110, key="solver_query")
 
@@ -360,36 +358,30 @@ if st.button("Generate Answer", use_container_width=True):
                 q_lower = user_query.lower()
                 if "power set" in q_lower or "elements" in q_lower or "p(a)" in q_lower:
                     solution = r"""### 📘 Step-by-Step Mathematical Solution
-
 **Problem:** If set $A$ has $3$ elements, how many elements are in the power set $P(A)$?
 
 #### **Step 1: Apply the Cardinality Formula**
-If a finite set $A$ has $n$ elements, the total number of subsets (and thus the cardinality of the power set) is:
 $$|P(A)| = 2^n$$
-
 #### **Step 2: Calculate Final Value**
 Given $n = 3$:
 $$|P(A)| = 2^3 = 8$$
 
 #### **🎯 Final Answer:**
 The power set $P(A)$ contains **$8$ elements**."""
-                
                 elif "predicate" in q_lower or "student" in q_lower or "sohan" in q_lower:
                     solution = r"""### 📘 Step-by-Step Mathematical Proof (Predicate Logic)
-
 **Problem Formulation:** Every CS student loves coding. Sohan is a CS student. Prove: Sohan loves coding.
 
 #### **Step 1: Formal Logical Translation**
 * Let $C(x)$: "$x$ is a CS student."
 * Let $L(x)$: "$x$ loves coding."
-* Let $s$: "Sohan".
 * **Premise 1:** $\forall x (C(x) \rightarrow L(x))$
 * **Premise 2:** $C(s)$
 
-#### **Step 2: Formal Mathematical Proof Sequence**
-1. $\forall x (C(x) \rightarrow L(x))$ — Given (Premise 1)
-2. $C(s) \rightarrow L(s)$ — Universal Instantiation (UI) applied to step 1 for constant $s$.
-3. $C(s)$ — Given (Premise 2)
+#### **Step 2: Formal Proof Sequence**
+1. $\forall x (C(x) \rightarrow L(x))$ — Given
+2. $C(s) \rightarrow L(s)$ — Universal Instantiation (UI)
+3. $C(s)$ — Given
 4. $L(s)$ — Modus Ponens (MP) applied to steps 2 and 3.
 
 #### **🎯 Final Resolution Status:**
@@ -397,8 +389,9 @@ The argument is **Valid**."""
                 else:
                     solution = r"""### 📘 Step-by-Step Mathematical Solution
 **Problem:** Solve the linear homogeneous recurrence relation $a_n = 5a_{n-1} - 6a_{n-2}$ with $a_0 = 1, a_1 = 5$.
+
 #### **Step 1: Formulate the Characteristic Equation**
-$$r^2 - 5r + 6 = 0 \implies (r-2)(r-3) = 0 \implies r_1 = 2, \quad r_2 = 3$$
+$$r^2 - 5r + 6 = 0 \implies (r-2)(r-3) = 0$$
 #### **🎯 Final Explicit Formula:**
 $$a_n = -1 \cdot 2^n + 2 \cdot 3^n$$"""
             st.balloons()
@@ -408,7 +401,7 @@ $$a_n = -1 \cdot 2^n + 2 \cdot 3^n$$"""
 
 st.write("---")
 
-# 🧠 ১১. মক টেস্ট ল্যাব (১০টি হাই-কোয়ালিটি মিশ্র প্রশ্ন সংবলিত মেগা ল্যাব)
+# 🧠 ১১. মক টেস্ট ল্যাব (১০টি সম্পূর্ণ প্রশ্নের মিশ্র কমপ্লিট সেট)
 st.markdown("<h3 style='color: #38bdf8;'>📝 Interactive Exam Lab with Dynamic Filter</h3>", unsafe_allow_html=True)
 
 master_questions = [
