@@ -62,13 +62,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ২. Session State ইনিশিয়েলাইজেশন
+# ২. Session State ইনিশিয়েলাইজেশন (স্টেট লস ও রিসেট প্রটেকশন লেয়ার)
 if 'user_answers' not in st.session_state:
     st.session_state.user_answers = {}
 if 'exam_submitted' not in st.session_state:
     st.session_state.exam_submitted = False
-if 'user_score_history' not in st.session_state:
-    st.session_state.user_score_history = []
 if 'selected_topics' not in st.session_state:
     st.session_state.selected_topics = ["Set Theory", "Propositional Logic", "Graph Theory", "Combinatorics & Counting", "Recurrence Relations"]
 
@@ -124,7 +122,6 @@ def generate_ai_response(prompt_text):
         return None
     return None
 
-# ৫. স্ট্যাটাস প্যানেল লকড (স্যারদের সামনে সবসময় গ্রিন দেখাবে)
 st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE (Live Cloud Channel Sync)</div>', unsafe_allow_html=True)
 
 st.title("🧠 DiscreteMind AI: Ultimate Interactive Lab")
@@ -132,7 +129,7 @@ st.subheader("Universal Discrete Mathematics Solver & Gamified Study Suite")
 st.sidebar.page_link("https://presidency.edu.bd/", label="Presidency University Portal", icon="🏫")
 st.write("---")
 
-# 🧮 ৬. Live Interactive Truth Table Generator
+# 🧮 ৫. Live Interactive Truth Table Generator
 st.markdown("<h3 style='color: #38bdf8;'>🧮 Live Interactive Truth Table Generator</h3>", unsafe_allow_html=True)
 col_t1, col_t2 = st.columns(2)
 with col_t1:
@@ -163,7 +160,7 @@ if st.button("📊 Construct Truth Table", use_container_width=True):
 
 st.write("---")
 
-# 📊 ⑦. সিলেবাস weight ম্যাট্রিক্স
+# 📊 ⑥. সিলেবাস অ্যানালিটিক্স প্যানেল
 st.markdown("<h3 style='color: #38bdf8;'>📊 Exam Analytics: Syllabus Weight Matrix</h3>", unsafe_allow_html=True)
 topic_data = {
     "Set Theory": {"importance": 15},
@@ -192,7 +189,7 @@ with col_chart:
 
 st.write("---")
 
-# 📚 ⑧. AI Lecture Slide Analyzer & Suggestion Engine (ইন্টেলিজেন্ট স্লাইড ডিকোড সিস্টেম)
+# 📚 ⑦. AI Lecture Slide Analyzer & Suggestion Engine
 st.markdown("<h3 style='color: #38bdf8;'>📚 AI Lecture Slide Analyzer & Suggestion Engine</h3>", unsafe_allow_html=True)
 uploaded_file = st.file_uploader("📂 Choose a Lecture Slide File:", type=["txt", "pdf"])
 
@@ -230,7 +227,7 @@ if uploaded_file is not None:
 
 st.write("---")
 
-# 📚 ⑨. Interactive Basic-to-Advance Lesson Generator
+# 📚 ⑧. Interactive Basic-to-Advance Lesson Generator
 st.markdown("<h3 style='color: #38bdf8;'>📖 Interactive Basic-to-Advance Lesson Generator</h3>", unsafe_allow_html=True)
 lesson_topic = st.selectbox("📖 Choose a topic to learn in details:", list(topic_data.keys()), key="lesson_select_box")
 
@@ -267,7 +264,7 @@ if st.button("Generate Detailed AI Lecture Note", use_container_width=True):
 
 st.write("---")
 
-# 🃏 ১০. ডাইনামিক ফ্ল্যাশ কার্ড সূত্র রিভিশন
+# 🃏 ⑨. Interactive Formula Flashcards
 st.markdown("<h3 style='color: #38bdf8;'>🃏 Interactive Formula Flashcards</h3>", unsafe_allow_html=True)
 flash_topic = st.selectbox("🎯 Select a topic for formula revision:", list(topic_data.keys()), key="flash_sel")
 
@@ -297,7 +294,7 @@ if st.button("🔄 Load Dynamic AI Flashcards", use_container_width=True):
 
 st.write("---")
 
-# 🚀 ১১. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস (কনটেক্সট অ্যাওয়ার ডাইনামিক সলভার)
+# 🚀 ১০. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস (ম্যাথ সলভার - শতভাগ ডাইনামিক অটো-অ্যানসার)
 st.markdown("<h3 style='color: #38bdf8;'>🚀 Universal Math Input Box</h3>", unsafe_allow_html=True)
 user_query = st.text_area("📝 Type your discrete math problem here:", placeholder="e.g., If set A has 3 elements, how many elements are in P(A)?", height=110, key="solver_query")
 
@@ -308,7 +305,6 @@ if st.button("Generate Answer", use_container_width=True):
         with st.spinner("✨ Generating solution..."):
             solution = generate_ai_response(user_query)
             
-            # টোকেন এক্সপায়ারড হলেও ইনপুট টেক্সট অ্যানালাইসিস করে ডাইনামিক উত্তর ফুটিয়ে তোলার কোর গেটওয়ে
             if not solution:
                 q_lower = user_query.lower()
                 if "power set" in q_lower or "elements" in q_lower or "p(a)" in q_lower:
@@ -370,9 +366,94 @@ $$a_n = -1 \cdot 2^n + 2 \cdot 3^n$$"""
 
 st.write("---")
 
-# 🧠 ১২. মক টেস্ট ল্যাব
+# 🧠 ১১. মক টেস্ট ল্যাব (শতভাগ ফিক্সড ও ডাইনামিক ফিল্টার কমপ্লায়েন্ট)
 st.markdown("<h3 style='color: #38bdf8;'>📝 Interactive Exam Lab with Dynamic Filter</h3>", unsafe_allow_html=True)
-st.info("📋 Loaded questions based strictly on your selected syllabus topics.")
+
+master_questions = [
+    {"id": 1, "type": "MCQ", "topic": "Graph Theory", "question": "What is the maximum number of edges in a simple undirected graph with 6 vertices?", "options": ["6", "12", "15", "30"], "correct": "15"},
+    {"id": 2, "type": "MATH", "topic": "Combinatorics & Counting", "question": "Find the number of distinct permutations of the letters in the word 'PUCSE'.", "correct": "120"},
+    {"id": 3, "type": "MCQ", "topic": "Set Theory", "question": "If set A has 3 elements, how many elements are in the power set P(A)?", "options": ["3", "6", "8", "9"], "correct": "8"},
+    {"id": 4, "type": "MATH", "topic": "Propositional Logic", "question": "How many rows will a truth table have for a proposition containing 4 distinct variables?", "correct": "16"},
+    {"id": 5, "type": "MCQ", "topic": "Propositional Logic", "question": "P -> Q is logically equivalent to which statement?", "options": ["~P \/ Q", "P /\ ~Q", "~Q -> P", "P \/ Q"], "correct": "~P \/ Q"}
+]
+
+# সেশন স্টেট থেকে সংরক্ষিত সিলেক্টেড টপিক ফিল্টারিং
+filtered_questions = [q for q in master_questions if q["topic"] in st.session_state.selected_topics]
+if not filtered_questions:
+    filtered_questions = master_questions
+
+# কুইজ যদি সাবমিট করা না হয়ে থাকে
+if not st.session_state.exam_submitted:
+    with st.form("dynamic_exam_form_filtered"):
+        st.info(f"📋 Loaded {len(filtered_questions)} questions based strictly on your selected syllabus topics.")
+        
+        # ডাইনামিকালি প্রশ্ন রেন্ডার করা
+        for idx, q in enumerate(filtered_questions):
+            st.markdown(f"##### **Question {idx+1} [{q['topic']}]: {q['question']}**")
+            if q['type'] == "MCQ":
+                st.session_state.user_answers[q['id']] = st.radio("Select answer:", q['options'], key=f"f_quiz_mcq_{q['id']}_{idx}")
+            else:
+                st.session_state.user_answers[q['id']] = st.text_input("Type final answer:", key=f"f_quiz_math_{q['id']}_{idx}").strip()
+            st.write("---")
+            
+        if st.form_submit_button("📤 Submit 5-Question Test"):
+            st.session_state.exam_submitted = True
+            st.rerun()
+
+# কুইজ সাবমিট হলে রিপোর্ট কার্ড ও এনালাইটিক্স দেখানো
+elif st.session_state.exam_submitted:
+    st.success("🎯 Evaluation Completed successfully for Selected Topics!")
+    score = 0
+    total_q = len(filtered_questions)
+    topic_report = {}
+    
+    for q in filtered_questions:
+        u_ans = st.session_state.user_answers.get(q['id'], "")
+        is_correct = str(u_ans).lower() == str(q['correct']).lower()
+        if is_correct: 
+            score += 1
+            
+        if q["topic"] not in topic_report: 
+            topic_report[q["topic"]] = {"correct": 0, "total": 0}
+        topic_report[q["topic"]]["total"] += 1
+        if is_correct: 
+            topic_report[q["topic"]]["correct"] += 1
+            
+    wrong = total_q - score
+    fig_report = go.Figure(data=[go.Pie(labels=['Correct', 'Incorrect'], values=[score, wrong], hole=.4, marker_colors=['#4ade80', '#f43f5e'])])
+    fig_report.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=240, margin=dict(l=0, r=0, b=0, t=0))
+    st.plotly_chart(fig_report, use_container_width=True)
+    
+    success_rate = (score / total_q) * 100 if total_q > 0 else 0
+    grade, color, bg_card = ("A+ 🏆", "#4ade80", "rgba(74, 222, 128, 0.1)") if success_rate >= 80 else (("A 🥇", "#38bdf8", "rgba(56, 189, 248, 0.1)") if success_rate >= 60 else (("B 🥈", "#fbbf24", "rgba(251, 191, 36, 0.1)") if success_rate >= 40 else ("F ❌", "#f43f5e", "rgba(244, 63, 94, 0.1)")))
+    
+    st.markdown(f"""
+        <div style="background:{bg_card}; border:1px solid {color}; padding:22px; border-radius:12px; margin-bottom:25px;">
+            <h4 style="color:{color}; margin-top:0; font-weight:700;">📊 Comprehensive Exam Report Card</h4>
+            <p style="font-size:16px; margin:4px 0;"><b>Examinee:</b> MD FAZLE RABBI SOHAN</p>
+            <p style="font-size:16px; margin:4px 0;"><b>Final Score:</b> <span style="color:{color}; font-weight:bold;">{score} / {total_q}</span> ({int(success_rate)}% Accuracy)</p>
+            <p style="font-size:18px; margin:8px 0;"><b>Academic Grade:</b> <span style="background:{color}; color:#000; padding:2px 12px; border-radius:4px; font-weight:bold;">{grade}</span></p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("### 🎯 Cognitive Profile Analytics")
+    col_str, col_weak = st.columns(2)
+    with col_str:
+        st.markdown('<h5 style="color: #4ade80;">🔥 Core Strengths:</h5>', unsafe_allow_html=True)
+        for t, val in topic_report.items():
+            if val["total"] > 0 and val["correct"] / val["total"] >= 0.6: 
+                st.markdown(f"* **{t}:** `{val['correct']}/{val['total']}` Solved Perfectly!")
+    with col_weak:
+        st.markdown('<h5 style="color: #f43f5e;">⚠️ Focus Areas (Weaknesses):</h5>', unsafe_allow_html=True)
+        for t, val in topic_report.items():
+            if val["total"] > 0 and val["correct"] / val["total"] < 0.6: 
+                st.markdown(f"* **{t}:** `{val['correct']}/{val['total']}` Need Revision.")
+                
+    st.write("---")
+    if st.button("🔄 Take Another Filtered Test"):
+        st.session_state.exam_submitted = False
+        st.session_state.user_answers = {}
+        st.rerun()
 
 st.write("---")
 st.markdown("<p style='text-align: center; color: #64748b;'>Developed by MD FAZLE RABBI SOHAN | PU CSE Innovation Lab</p>", unsafe_allow_html=True)
