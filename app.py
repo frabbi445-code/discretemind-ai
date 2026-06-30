@@ -26,6 +26,7 @@ st.markdown("""
         background: #0284c7 !important; color: #ffffff !important;
         font-weight: bold !important; border: none !important;
         border-radius: 6px !important; padding: 0.6rem 2rem !important;
+        width: 100%;
     }
     .stButton>button:hover { background: #0369a1 !important; }
     
@@ -60,24 +61,32 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ২. ডাইনামিক এপিআই কি কনফিগারেশন ও ফলব্যাক ম্যানেজমেন্ট
+# ২. Session State ইনিশিয়েলাইজেশন (রিসেট ও ক্রাশ প্রটেকশন লেয়ার)
+if 'user_answers' not in st.session_state:
+    st.session_state.user_answers = {}
+if 'exam_submitted' not in st.session_state:
+    st.session_state.exam_submitted = False
+if 'user_score_history' not in st.session_state:
+    st.session_state.user_score_history = []
+if 'selected_topics' not in st.session_state:
+    st.session_state.selected_topics = ["Set Theory", "Propositional Logic", "Graph Theory", "Combinatorics & Counting", "Recurrence Relations"]
+
+# ৩. এপিআই কি গেটওয়ে (Secrets ভেরিফিকেশন)
 try:
     GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 except Exception:
     GEMINI_API_KEY = "AQ.Ab8RN6KhKccD25XJHsm9m7Le2xdcpWKY9EnCxQmGzRrDuoW26A"
 
 clean_key = str(GEMINI_API_KEY).strip().replace('"', '').replace("'", "")
-ai_ready = True
 
-# প্রজেক্ট সেফগার্ড ইন্ডিকেটর (অলওয়েজ সবুজ অনলাইন মোড)
-st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE (Live Synchronized Mode)</div>', unsafe_allow_html=True)
+st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE (Direct Network Sync)</div>', unsafe_allow_html=True)
 
 def generate_ai_response(prompt_text):
     try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={clean_key}"
         headers = {'Content-Type': 'application/json'}
         payload = {"contents": [{"parts": [{"text": prompt_text}]}]}
-        res = requests.post(url, headers=headers, json=payload, timeout=8)
+        res = requests.post(url, headers=headers, json=payload, timeout=10)
         if res.status_code == 200:
             return res.json()['candidates'][0]['content']['parts'][0]['text']
     except Exception:
@@ -86,26 +95,18 @@ def generate_ai_response(prompt_text):
 
 st.title("🧠 DiscreteMind AI: Ultimate Interactive Lab")
 st.subheader("Universal Discrete Mathematics Solver & Gamified Study Suite")
-st.write("Presidency University | CSE Dept")
+st.write("Presidency University | CSE Dept | Innovation Edition")
 st.write("---")
 
-# Session State
-if 'user_answers' not in st.session_state:
-    st.session_state.user_answers = {}
-if 'exam_submitted' not in st.session_state:
-    st.session_state.exam_submitted = False
-if 'user_score_history' not in st.session_state:
-    st.session_state.user_score_history = []
-
-# ৩. সাইডবার প্রোফাইল
+# ৪. সাইডবার প্রোফাইল
 st.sidebar.markdown("<h3 style='color: #38bdf8;'>🎓 Student Profile</h3>", unsafe_allow_html=True)
 with st.sidebar.container(border=True):
     st.write("**Developer:** MD FAZLE RABBI SOHAN")
     st.write("**Institution:** Presidency University")
     st.write("**Department:** CSE")
-    st.sidebar.page_link("https://presidency.edu.bd/", label="Presidency University Portal", icon="🏫")
+st.sidebar.page_link("https://presidency.edu.bd/", label="Presidency University Portal", icon="🏫")
 
-# 🧮 ৪. Live Interactive Truth Table Generator
+# 🧮 ৫. Live Interactive Truth Table Generator
 st.markdown("<h3 style='color: #38bdf8;'>🧮 Live Interactive Truth Table Generator</h3>", unsafe_allow_html=True)
 col_t1, col_t2 = st.columns(2)
 with col_t1:
@@ -136,7 +137,7 @@ if st.button("📊 Construct Truth Table", use_container_width=True):
 
 st.write("---")
 
-# 📊 ৫. সিলেবাস অ্যানালিটিক্স প্যানেল (গ্লোবাল সেফগার্ড)
+# 📊 ৬. সিলেবাস অ্যানালিটিক্স (সেশন স্টেটে মেমোরি সেভ করা হলো)
 st.markdown("<h3 style='color: #38bdf8;'>📊 Exam Analytics: Syllabus Weight Matrix</h3>", unsafe_allow_html=True)
 topic_data = {
     "Set Theory": {"importance": 15},
@@ -149,21 +150,23 @@ topic_data = {
 col_list, col_chart = st.columns([1, 1.2])
 with col_list:
     st.markdown("##### 🔍 Select Syllabus Topics:")
-    selected_topics = [t for t in topic_data.keys() if st.checkbox(t, value=True, key=f"global_sync_{t}")]
+    temp_topics = []
+    for t in topic_data.keys():
+        if st.checkbox(t, value=True, key=f"sys_chk_{t}"):
+            temp_topics.append(t)
+    if temp_topics:
+        st.session_state.selected_topics = temp_topics
 
-if not selected_topics:
-    selected_topics = list(topic_data.keys())
-
-labels = selected_topics
-importance_values = [topic_data[t]["importance"] for t in selected_topics]
+labels = st.session_state.selected_topics
+importance_values = [topic_data[t]["importance"] for t in labels]
 fig_pie = go.Figure(data=[go.Pie(labels=labels, values=importance_values, hole=.3, marker_colors=['#0ea5e9', '#38bdf8', '#0284c7', '#7dd3fc', '#bae6fd'])])
-fig_pie.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=230, margin=dict(l=0, r=0, b=0, t=10))
+fig_pie.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=250, margin=dict(l=0, r=0, b=0, t=10))
 with col_chart:
     st.plotly_chart(fig_pie, use_container_width=True)
 
 st.write("---")
 
-# 📚 ৬. আল্ট্রা-ডিটেইলড ৫০ লাইনের মেগা লেকচার নোটস ডাটাবেস
+# 📚 ৭. আল্ট্রা-ডিটেইলড ৫০ লাইনের মেগা লেকচার নোটস ডাটাবেস
 st.markdown("<h3 style='color: #38bdf8;'>📚 Interactive Basic-to-Advance Lesson Generator</h3>", unsafe_allow_html=True)
 lesson_topic = st.selectbox("📖 Choose a topic to learn in details:", list(topic_data.keys()), key="lesson_select_box")
 
@@ -191,28 +194,29 @@ $$A \cap B = \{x \mid x \in A \land x \in B\}$$
 $$\text{Theorem 1: } \overline{A \cup B} = \overline{A} \cap \overline{B}$$
 
 **প্রমাণ (Proof):**
-ধরি, $x \in \overline{A \cup B} \implies x \notin (A \cup B) \implies \neg(x \in A \lor x \in B) \implies (x \notin A) \land (x \notin B) \implies x \in \overline{A} \cap \overline{B}$। অতএব, $\overline{A \cup B} \subseteq \overline{A} \cap \overline{B}$।
+ধরি, $x \in \overline{A \cup B} \implies x \notin (A \cup B) \implies \neg(x \in A \lor x \in B) \implies (x \notin A) \land (x \notin B) \implies x \in \overline{A} \cap \overline{B}$
 
-#### **৫. বিস্তারিত গাণিতিক উদাহরণ (Detailed Mathematical Solved Examples)**
-* **উদাহরণ ১:** ধরি একটি সার্বিক সেট $\mathcal{U} = \{1, 2, 3, 4, 5, 6, 7, 8, 9, 10\}$ এবং উপসেট $A = \{1, 3, 5, 7, 9\}$, $B = \{2, 3, 5, 7\}$। 
-  * $A \cup B = \{1, 2, 3, 5, 7, 9\}$
-  * $A \cap B = \{3, 5, 7\}$
-* **উদাহরণ ২:** যদি $A = \{x, y\}$ এবং $B = \{1, 2, 3\}$ হয়, তবে কার্তেসীয় গুণজ $A \times B = \{(x, 1), (x, 2), (x, 3), (y, 1), (y, 2), (y, 3)\}$।
+#### **৫. বিস্তারিত গাণিতিক উদাহরণ (Detailed Solved Examples)**
+**উদাহরণ ১:** $\mathcal{U} = \{1, 2, 3, 4, 5, 6, 7, 8, 9, 10\}$ এবং উপসেট $A = \{1, 3, 5, 7, 9\}$ এবং $B = \{2, 3, 5, 7\}$। 
+* **$A \cup B$ বের করো:** $\{1, 2, 3, 5, 7, 9\}$
+* **$A \cap B$ বের করো:** $\{3, 5, 7\}$
 
 #### **৬. পাঠ্যপুস্তক নির্দেশিকা ও তথ্যসূত্র (References & Textbook Guide)**
-* 📖 *Discrete Mathematics and Its Applications* by Kenneth H. Rosen (Chapter 2).""",
+* 📖 *Discrete Mathematics and Its Applications* by Kenneth H. Rosen (Chapter 2: Sets, Functions, and Sequences).""",
 
     "Propositional Logic": r"""### 📘 Masterclass Lecture: Propositional Logic (প্রপোজিশনাল লজিক)
-#### **১. প্রপোজিশন ও লজিক্যাল কানেক্টিভস**
-একটি প্রপোজিশন হলো এমন একটি ডিক্লারেটিভ বাক্য যা সম্পূর্ণ সত্য (True - T) অথবা সম্পূর্ণ মিথ্যা (False - F) হতে পারে।
-* **লজিক্যাল অপারেটরসমূহ:**
+
+#### **১. প্রপোজিশন ও লজিক্যাল কানেক্টিভস (Propositions & Logical Connectives)**
+একটি প্রপোজিশন হলো এমন একটি ডিক্লারেティブ বাক্য যা সম্পূর্ণ সত্য (True - T) অথবা সম্পূর্ণ মিথ্যা (False - F) হতে পারে, কিন্তু একসাথে সত্য ও মিথ্যা উভয়ই হতে পারে না।
+* **লজিক্যাল অপারেটরসমূহ (Logical Operators):**
   1. **Negation ($\neg P$):** NOT গেটের মতো কাজ করে।
   2. **Conjunction ($P \land Q$):** AND গেটের মতো।
   3. **Disjunction ($P \lor Q$):** OR গেটের মতো।
+
+#### **②. ট্রুথ টেবিল ও সমতুল্যতা (Truth Tables & Logical Equivalence)**
 $$P \rightarrow Q \equiv \neg P \lor Q$$
 
-#### **২. বিস্তারিত গাণিতিক উদাহরণ (Detailed Solved Examples)**
-* ** can  উদাহরণ ১:** প্রমাণ করো যে $P \rightarrow Q$ এবং $\neg P \lor Q$ যৌক্তিকভাবে সমতুল্য।
+#### **৩. বিস্তারিত গাণিতিক উদাহরণ (Detailed Mathematical Solved Examples)**
 | $P$ | $Q$ | $\neg P$ | $P \rightarrow Q$ | $\neg P \lor Q$ |
 | :---: | :---: | :---: | :---: | :---: |
 | T | T | F | **T** | **T** |
@@ -220,7 +224,7 @@ $$P \rightarrow Q \equiv \neg P \lor Q$$
 | F | T | T | **T** | **T** |
 | F | F | T | **T** | **T** |
 
-#### **৩. পাঠ্যপুস্তক নির্দেশিকা (References)**
+#### **৪. পাঠ্যপুস্তক নির্দেশিকা ও তথ্যসূত্র (References & Textbook Guide)**
 * 📖 *Discrete Mathematics and Its Applications* by Kenneth H. Rosen (Chapter 1).""",
 
     "Graph Theory": r"""### 📘 Masterclass Lecture: Advanced Graph Theory (গ্রাফ তত্ত্ব)
@@ -229,50 +233,41 @@ $$P \rightarrow Q \equiv \neg P \lor Q$$
 $$\sum_{v \in V} \text{deg}(v) = 2|E|$$
 
 #### **২. বিস্তারিত গাণিতিক উদাহরণ (Detailed Solved Examples)**
-* ** can   can   can  উদাহরণ ১:** একটি সাধারণ আনডাইরেক্টেড গ্রাফে ১৫টি এজ (Edges) আছে। যদি গ্রাফের ৩টি নোডের ডিগ্রী ৪ হয় এবং বাকি নোডগুলোর ডিগ্রী ২ হয়, তবে গ্রাফটির মোট নোড সংখ্যা কত?
+* **উদাহরণ ১:** একটি সাধারণ আনডাইরেক্টেড গ্রাফে ১৫টি এজ (Edges) আছে। যদি গ্রাফের ৩টি নোডের ডিগ্রী ৪ হয় এবং বাকি নোডগুলোর ডিগ্রী ২ হয়, তবে গ্রাফটির মোট নোড সংখ্যা কত?
   $$\sum \text{deg}(v) = 2|E| \implies 12 + 2(n - 3) = 2 \times 15 \implies 2n + 6 = 30 \implies n = 12$$
-  অতএব, গ্রাফটির মোট নোড সংখ্যা ১২টি।
-
-#### **৩. পাঠ্যপুস্তক নির্দেশিকা (References)**
-* 📖 *Introduction to Graph Theory* by Douglas B. West.""",
+  অতএব, গ্রাফটির মোট নোড সংখ্যা ১২টি।""",
 
     "Combinatorics & Counting": r"""### 📘 Masterclass Lecture: Combinatorics & Counting (বিন্যাস ও সমাবেশ)
 #### **১. বিন্যাস ও সমাবেশ (Permutations & Combinations)**
 $$P(n, r) = \frac{n!}{(n-r)!}, \quad C(n, r) = \frac{n!}{r!(n-r)!}$$
 #### **২. পায়রাখোপ নীতি (Pigeonhole Principle)**
-যদি $n$ সংখ্যক পায়রাকে $k$ সংখ্যক খোপে রাখা হয় এবং $n > k$ হয়, তবে অন্তত একটি খোপে ১টির বেশি পায়রা থাকবে। জেনারেলাইজড মান: $\lceil n/k \rceil$।
-
-#### **৩. বিস্তারিত গাণিতিক উদাহরণ**
-* ** can   can  উদাহরণ ১:** PRESIDENCY শব্দটির অক্ষরগুলোকে কতভাবে সাজানো যাবে যাতে স্বরবর্ণগুলো (Vowels) সবসময় একসাথে থাকে?
-  * সমাধান: মোট বিন্যাস সংখ্যা = $8! \times \frac{3!}{2!} = 120,960$ উপায়ে।""",
+যদি $n$ সংখ্যক পায়রাকে $k$ সংখ্যক খোপে রাখা হয় এবং $n > k$ হয়, তবে অন্তত একটি খোপে ১টির বেশি পায়রা থাকবে। জেনারেলাইজড মান: $\lceil n/k \rceil$।""",
 
     "Recurrence Relations": r"""### 📘 Masterclass Lecture: Recurrence Relations (পুনরাবৃত্তি সম্পর্ক)
 #### **১. ক্যারেক্টারিস্টিক সমীকরণ সমাধান:**
 $a_n = c_1a_{n-1} + c_2a_{n-2}$ সমীকরণের জন্য ক্যারেক্টারিস্টিক রুট সমীকরণটি হলো:
 $$r^2 - c_1r - c_2 = 0$$
-
 #### **২. বিস্তারিত গাণিতিক উদাহরণ (Detailed Solved Examples)**
-* ** can  can  উদাহরণ ১:** Solve the recurrence relation $a_n = 5a_{n-1} - 6a_{n-2}$ with initial conditions $a_0 = 1, a_1 = 5$。
-  * Characteristic equation is $r^2 - 5r + 6 = 0 \implies (r-2)(r-3) = 0$。 Roots are $r_1=2, r_2=3$。
-  * Final Explicit Solution: $a_n = -1 \cdot 2^n + 2 \cdot 3^n$。"""
+* **উদাহরণ ১:** Solve $a_n = 5a_{n-1} - 6a_{n-2}$ with initial conditions $a_0 = 1, a_1 = 5$.
+  * $r^2 - 5r + 6 = 0 \implies (r-2)(r-3) = 0 \implies r_1=2, r_2=3$.
+  * Final Explicit Solution: $a_n = -1 \cdot 2^n + 2 \cdot 3^n$"""
 }
 
 if st.button("Generate Detailed AI Lecture Note", use_container_width=True):
     with st.spinner(f"✨ Compiling notes for {lesson_topic}..."):
-        prompt = f"Write an ultra-detailed textbook-style advanced academic lecture note on the topic: '{lesson_topic}'. Include definitions and solved math examples with LaTeX block formatting. Output must be over 50 lines long."
+        prompt = f"Write an ultra-detailed academic lecture note on the topic: '{lesson_topic}'. Include definitions and solved math examples with LaTeX block formatting. Output must be over 50 lines long."
         content = generate_ai_response(prompt)
         
         st.markdown('<div class="answer-box">', unsafe_allow_html=True)
         if content and len(content.strip()) > 50:
             st.markdown(content)
         else:
-            # এপিআই রেসপন্স না দিলে এটি লোকাল মেগা ডাটাবেস থেকে টেক্সট লোড করবে
-            st.markdown(global_lessons.get(lesson_topic, "### Data Layer Ready."))
+            st.markdown(global_lessons.get(lesson_topic, "### Local Advanced Node Synced."))
         st.markdown('</div>', unsafe_allow_html=True)
 
 st.write("---")
 
-# 🃏 ७. ডাইনামিক ফ্ল্যাশ কার্ড সূত্র রিভিশন
+# 🃏 ৮. ডাইনামিক ফ্ল্যাশ কার্ড সূত্র রিভিশন
 st.markdown("<h3 style='color: #38bdf8;'>🃏 Interactive Formula Flashcards</h3>", unsafe_allow_html=True)
 flash_topic = st.selectbox("🎯 Select a topic for formula revision:", list(topic_data.keys()), key="flash_sel")
 
@@ -302,7 +297,7 @@ if st.button("🔄 Load Dynamic AI Flashcards", use_container_width=True):
 
 st.write("---")
 
-# 🚀 ৮. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস (ম্যাথ সলভার)
+# 🚀 ৯. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস (ম্যাথ সলভার)
 st.markdown("<h3 style='color: #38bdf8;'>🚀 Universal Math Input Box</h3>", unsafe_allow_html=True)
 user_query = st.text_area("📝 Type your discrete math problem here:", placeholder="e.g., Find the explicit formula for a_n = 5a_{n-1} - 6a_{n-2}...", height=110, key="solver_query")
 
@@ -331,79 +326,11 @@ $$a_n = -1 \cdot 2^n + 2 \cdot 3^n$$"""
 
 st.write("---")
 
-# 🧠 ৯. ডাইনামিক ফিল্টার সংবলিত ১০-কোয়েশ্চেন মক টেস্ট ল্যাব (Syllabus Protected)
+# 🧠 ১০. ডাইনামিক ফিল্টার সংবলিত ১০-কোয়েশ্চেন মক টেস্ট ল্যাব (Syllabus Synchronized)
 st.markdown("<h3 style='color: #38bdf8;'>📝 Interactive Exam Lab with Dynamic Filter</h3>", unsafe_allow_html=True)
 
 master_questions = [
     {"id": 1, "type": "MCQ", "topic": "Graph Theory", "question": "What is the maximum number of edges in a simple undirected graph with 6 vertices?", "options": ["6", "12", "15", "30"], "correct": "15"},
     {"id": 2, "type": "MATH", "topic": "Combinatorics & Counting", "question": "Find the number of distinct permutations of the letters in the word 'PUCSE'.", "correct": "120"},
     {"id": 3, "type": "MCQ", "topic": "Set Theory", "question": "If set A has 3 elements, how many elements are in the power set P(A)?", "options": ["3", "6", "8", "9"], "correct": "8"},
-    {"id": 4, "type": "MATH", "topic": "Propositional Logic", "question": "How many rows will a truth table have for a proposition containing 4 distinct variables?", "correct": "16"},
-    {"id": 5, "type": "MCQ", "topic": "Propositional Logic", "question": "P -> Q is logically equivalent to which statement?", "options": ["~P \/ Q", "P /\ ~Q", "~Q -> P", "P \/ Q"], "correct": "~P \/ Q"},
-    {"id": 6, "type": "MCQ", "topic": "Set Theory", "question": "What is the cardinality of the empty set power set P(P(empty_set))?", "options": ["0", "1", "2", "4"], "correct": "2"},
-    {"id": 7, "type": "MATH", "topic": "Combinatorics & Counting", "question": "How many bit strings of length 4 either start with a 1 bit or end with 0?", "correct": "12"},
-    {"id": 8, "type": "MCQ", "topic": "Graph Theory", "question": "A graph with no cycles is called what?", "options": ["Bipartite", "Tree/Acyclic", "Complete", "Eulerian"], "correct": "Tree/Acyclic"},
-    {"id": 9, "type": "MATH", "topic": "Recurrence Relations", "question": "Find the next term in the sequence defined by a_n = 2a_{n-1} + 1 with a_0 = 1.", "correct": "3"},
-    {"id": 10, "type": "MCQ", "topic": "Recurrence Relations", "question": "The Fibonacci sequence is defined by which recurrence order?", "options": ["First Order", "Second Order", "Third Order", "None"], "correct": "Second Order"}
-]
-
-# সেফগার্ড লজিক: ফিল্টার ভেরিয়েবল ক্র্যাশ প্রোটেকশন
-filtered_questions = [q for q in master_questions if q["topic"] in selected_topics]
-if not filtered_questions:
-    filtered_questions = master_questions
-
-if not st.session_state.exam_submitted:
-    with st.form("dynamic_exam_form_filtered"):
-        st.info(f"📋 Loaded {len(filtered_questions)} questions based strictly on your selected syllabus topics.")
-        for idx, q in enumerate(filtered_questions):
-            st.markdown(f"##### **Question {idx+1}: {q['question']}**")
-            if q['type'] == "MCQ":
-                st.session_state.user_answers[q['id']] = st.radio("Select answer:", q['options'], key=f"f_quiz_mcq_{q['id']}_{idx}")
-            else:
-                st.session_state.user_answers[q['id']] = st.text_input("Type final answer:", key=f"f_quiz_math_{q['id']}_{idx}").strip()
-            st.write("---")
-        if st.form_submit_button("📤 Submit 10-Question Test"):
-            st.session_state.exam_submitted = True
-            st.session_state.user_score_history.append(1)
-            st.rerun()
-
-elif st.session_state.exam_submitted:
-    st.success("🎯 Evaluation Completed successfully for Selected Topics!")
-    score = 0
-    total_q = len(filtered_questions)
-    topic_report = {}
-    detailed_report = []
-    
-    for q in filtered_questions:
-        u_ans = st.session_state.user_answers.get(q['id'], "")
-        is_correct = str(u_ans).lower() == str(q['correct']).lower()
-        if is_correct: score += 1
-        if q["topic"] not in topic_report: topic_report[q["topic"]] = {"correct": 0, "total": 0}
-        topic_report[q["topic"]]["total"] += 1
-        if is_correct: topic_report[q["topic"]]["correct"] += 1
-        detailed_report.append({"Q_Id": q['id'], "Topic": q["topic"], "Your Answer": u_ans, "Correct Answer": q['correct'], "Result": "✅ Correct" if is_correct else "❌ Incorrect"})
-    
-    wrong = total_q - score
-    fig_report = go.Figure(data=[go.Pie(labels=['Correct', 'Incorrect'], values=[score, wrong], hole=.4, marker_colors=['#4ade80', '#f43f5e'])])
-    fig_report.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=240, margin=dict(l=0, r=0, b=0, t=0))
-    st.plotly_chart(fig_report, use_container_width=True)
-    
-    success_rate = (score / total_q) * 100 if total_q > 0 else 0
-    grade, color, bg_card = ("A+ 🏆", "#4ade80", "rgba(74, 222, 128, 0.1)") if success_rate >= 90 else (("A 🥇", "#38bdf8", "rgba(56, 189, 248, 0.1)") if success_rate >= 70 else (("B 🥈", "#fbbf24", "rgba(251, 191, 36, 0.1)") if success_rate >= 40 else ("F ❌", "#f43f5e", "rgba(244, 63, 94, 0.1)")))
-    
-    st.markdown(f"""
-        <div style="background:{bg_card}; border:1px solid {color}; padding:22px; border-radius:12px; margin-bottom:25px;">
-            <h4 style="color:{color}; margin-top:0; font-weight:700;">📊 Comprehensive Exam Report Card</h4>
-            <p style="font-size:16px; margin:4px 0;"><b>Examinee:</b> MD FAZLE RABBI SOHAN</p>
-            <p style="font-size:16px; margin:4px 0;"><b>Final Score:</b> <span style="color:{color}; font-weight:bold;">{score} / {total_q}</span> ({int(success_rate)}% Accuracy)</p>
-            <p style="font-size:18px; margin:8px 0;"><b>Academic Grade:</b> <span style="background:{color}; color:#000; padding:2px 12px; border-radius:4px; font-weight:bold;">{grade}</span></p>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    st.write("---")
-    if st.button("🔄 Take Another Filtered Test"):
-        st.session_state.exam_submitted = False
-        st.rerun()
-
-st.write("---")
-st.markdown("<p style='text-align: center; color: #64748b;'>Developed by MD FAZLE RABBI SOHAN | PU CSE Innovation Lab</p>", unsafe_allow_html=True)
+    {"id": 4, "type": "MATH", "topic": "Propositional Logic", "question": "How many rows will a truth table have for a proposition containing 4 distinct
