@@ -4,6 +4,7 @@ import json
 import itertools
 import pandas as pd
 import plotly.graph_objects as go
+import google.generativeai as genai
 
 # ১. পেজ সেটিংস ও উচ্চ-কন্ট্রাস্ট মার্জিত থিম
 st.set_page_config(page_title="DiscreteMind AI", page_icon="🧠", layout="centered")
@@ -71,7 +72,7 @@ if 'user_score_history' not in st.session_state:
 if 'selected_topics' not in st.session_state:
     st.session_state.selected_topics = ["Set Theory", "Propositional Logic", "Graph Theory", "Combinatorics & Counting", "Recurrence Relations"]
 
-# ৩. সাইডবার সেটিংস এবং ডাইনামিক এপিআই কী কন্ট্রোল প্যানে
+# ৩. সাইডবার সেটিংস এবং ডাইনামিক এপিআই কী কন্ট্রোল প্যানেল
 st.sidebar.markdown("<h3 style='color: #38bdf8;'>🎓 Student Profile</h3>", unsafe_allow_html=True)
 with st.sidebar.container(border=True):
     st.write("**Developer:** MD FAZLE RABBI SOHAN")
@@ -91,47 +92,69 @@ custom_key_input = st.sidebar.text_input(
 
 clean_key = str(custom_key_input).strip().replace('"', '').replace("'", "")
 
-# ৪. ১০০% রিয়েল-টাইম রুট এডাপ্টিভ এপিআই গেটওয়ে (No Hardcoded Fallbacks)
+# ৪. অফিশিয়াল জেমিনি ক্লায়েন্ট মেকানিজম (টোকেন হ্যান্ডলিং ফিক্স)
+api_status_msg = "🟢 Core AI Engine: READY"
+api_status_color = "#4ade80"
+api_status_bg = "rgba(74, 222, 128, 0.1)"
+
+try:
+    if clean_key:
+        # অফিশিয়াল SDK কনফিগারেশন
+        genai.configure(api_key=clean_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+    else:
+        api_status_msg = "⚠️ API Key/Token Missing in Sidebar!"
+        api_status_color = "#fbbf24"
+        api_status_bg = "rgba(251, 191, 36, 0.1)"
+except Exception as init_err:
+    api_status_msg = f"❌ Config Error: {str(init_err)}"
+    api_status_color = "#f43f5e"
+    api_status_bg = "rgba(244, 63, 94, 0.1)"
+
 def generate_ai_response(prompt_text):
     if not clean_key:
         return "⚠️ API Key/Token অনুপস্থিত! দয়া করে সাইডবারে সঠিক টোকেনটি দাও।"
     
+    # ব্যাকআপ সরাসরি REST রিকোয়েস্ট প্রোটোকল (যদি SDK কোনো কারণে ব্লক হয়)
     payload = {
         "contents": [{"parts": [{"text": prompt_text}]}],
-        "generationConfig": {
-            "temperature": 0.1,
-            "maxOutputTokens": 2048
-        }
+        "generationConfig": {"temperature": 0.1, "maxOutputTokens": 2048}
     }
     
-    # AQ. টোকেনের জন্য Vertex AI ক্লাউড কমপ্লায়েন্ট ইন্টিগ্রেশন প্রোটোকল
-    if clean_key.startswith("AQ"):
-        # গুগল ক্লাউড আইএএম টোকেন এক্সচেঞ্জ এন্ডপয়েন্ট রুট
+    # রুট ১: অফিশিয়াল SDK এক্সিকিউশন ট্রাই
+    try:
+        response = model.generate_content(prompt_text)
+        if response.text:
+            return response.text
+    except Exception:
+        pass
+
+    # রুট ২: কাস্টম সিকিউর ক্লাউড গেটওয়ে হেডার রুট
+    try:
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': f'Bearer {clean_key}'
+            'X-Goog-Api-Key': clean_key if not clean_key.startswith("AQ") else ""
         }
-    else:
-        # ক্লাসিক এপিআই কী রুট
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={clean_key}"
-        headers = {'Content-Type': 'application/json'}
-
-    try:
-        res = requests.post(url, headers=headers, json=payload, timeout=15)
+        if clean_key.startswith("AQ"):
+            headers['Authorization'] = f'Bearer {clean_key}'
+        else:
+            url += f"?key={clean_key}"
+            
+        res = requests.post(url, headers=headers, json=payload, timeout=12)
         if res.status_code == 200:
             return res.json()['candidates'][0]['content']['parts'][0]['text']
         else:
-            # সরাসরি ক্লাউড সার্ভারের এরর বডি রিটার্ন করবে যাতে ট্রাবলশুট করা সহজ হয়
             try:
-                err_msg = res.json().get('error', {}).get('message', res.text)
+                err_details = res.json().get('error', {}).get('message', res.text)
             except Exception:
-                err_msg = res.text
-            return f"❌ **API Engine Service Error ({res.status_code})**: {err_msg}"
+                err_details = res.text
+            return f"❌ **API Engine Error ({res.status_code})**: {err_details}\n\n*পরামর্শ: টোকেনটির মেয়াদ শেষ হয়ে থাকতে পারে, নতুন একটি AQ. বা AIzaSy কী দিয়ে ট্রাই করুন।*"
     except Exception as e:
-        return f"⚠️ **Network Connection Timeout / Exception**: {str(e)}"
+        return f"⚠️ **Network Connection Exception**: {str(e)}"
 
-st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE</div>', unsafe_allow_html=True)
+# রিয়েল-টাইম স্ট্যাটাস ডিসপ্লে
+st.markdown(f'<div class="status-panel" style="background-color: {api_status_bg}; border: 1px solid {api_status_color}; color: {api_status_color} !important;">{api_status_msg}</div>', unsafe_allow_html=True)
 
 st.title("🧠 DiscreteMind AI: Ultimate Interactive Lab")
 st.subheader("Universal Discrete Mathematics Solver & Gamified Study Suite")
@@ -206,7 +229,7 @@ if uploaded_file is not None:
     try:
         raw_text_data = str(uploaded_file.getvalue().decode("utf-8", errors="ignore"))[:2500]
     except Exception:
-        raw_text_data = "Sample Content Matrix."
+        raw_text_data = "Sample Slide Context"
 
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
@@ -215,43 +238,36 @@ if uploaded_file is not None:
         suggest_clicked = st.button("🎯 Generate Important Exam Suggestions", use_container_width=True)
 
     if analyze_clicked:
-        with st.spinner("✨ AI is analyzing and preparing explanations..."):
-            slide_prompt = f"Act as an expert Computer Science Professor teaching at Presidency University. Provide a highly coherent, rigorous, step-by-step explanation for undergraduate students using appropriate mathematical notation for this content: {raw_text_data}"
-            explanation = generate_ai_response(slide_prompt)
-            
+        with st.spinner("✨ AI is analyzing..."):
+            explanation = generate_ai_response(f"Explain this content: {raw_text_data}")
             st.markdown('<div class="answer-box">', unsafe_allow_html=True)
-            st.markdown("#### 🎓 Student-Friendly Concept Breakdowns:")
             st.markdown(explanation)
             st.markdown('</div>', unsafe_allow_html=True)
 
     if suggest_clicked:
-        with st.spinner("🎯 Generating suggestions..."):
-            suggest_prompt = f"Act as a Senior Examiner. Generate exactly 3 high-importance undergraduate exam questions and core conceptual guidelines for preparation based strictly on this text: {raw_text_data}"
-            suggestions = generate_ai_response(suggest_prompt)
-            
+        with st.spinner("🎯 Generating Suggestions..."):
+            suggestions = generate_ai_response(f"Give exam suggestions for: {raw_text_data}")
             st.markdown('<div class="answer-box">', unsafe_allow_html=True)
-            st.markdown("#### 🚨 High-Yield Exam Suggestions:")
             st.markdown(suggestions)
             st.markdown('</div>', unsafe_allow_html=True)
 
 st.write("---")
 
-# 📚 ৮. Interactive Basic-to-Advance Lesson Generator (Pure Real-Time AI)
+# 📚 ৮. Interactive Basic-to-Advance Lesson Generator
 st.markdown("<h3 style='color: #38bdf8;'>📖 Interactive Basic-to-Advance Lesson Generator</h3>", unsafe_allow_html=True)
 lesson_topic = st.selectbox("📖 Choose a topic to learn in details:", list(topic_data.keys()), key="lesson_select_box")
 
 if st.button("Generate Detailed AI Lecture Note", use_container_width=True):
     with st.spinner(f"✨ Compiling notes for {lesson_topic}..."):
-        prompt = f"Write an ultra-detailed textbook-style advanced academic lecture note on the topic: '{lesson_topic}'. Structure the note with basic definition, detailed logic rules, and solved math examples with clear LaTeX block formatting. Output must be over 50 lines long."
+        prompt = f"Write an ultra-detailed textbook-style advanced academic lecture note on the topic: '{lesson_topic}'. Structure the note with basic definition, detailed logic rules, and solved math examples with clear LaTeX block formatting."
         content = generate_ai_response(prompt)
-        
         st.markdown('<div class="answer-box">', unsafe_allow_html=True)
         st.markdown(content)
         st.markdown('</div>', unsafe_allow_html=True)
 
 st.write("---")
 
-# 🃏 ৯. ডাইনামিক ফ্ল্যাশ কার্ড সূত্র রিভিশন
+# 🃏 ৯. Interactive Formula Flashcards
 st.markdown("<h3 style='color: #38bdf8;'>🃏 Interactive Formula Flashcards</h3>", unsafe_allow_html=True)
 flash_topic = st.selectbox("🎯 Select a topic for formula revision:", list(topic_data.keys()), key="flash_sel")
 
@@ -281,7 +297,7 @@ if st.button("🔄 Load Dynamic AI Flashcards", use_container_width=True):
 
 st.write("---")
 
-# 🚀 ১০. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস (ম্যাথ সলভার - শতভাগ লাইভ রিয়েল-টাইম জেনারেটর)
+# 🚀 ১০. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস (ম্যাথ সলভার - লাইভ ইঞ্জিন)
 st.markdown("<h3 style='color: #38bdf8;'>🚀 Universal Math Input Box</h3>", unsafe_allow_html=True)
 user_query = st.text_area("📝 Type your discrete math problem here:", placeholder="e.g., If set A has 3 elements, how many elements are in P(A)?", height=110, key="solver_query")
 
@@ -306,7 +322,7 @@ master_questions = [
     {"id": 1, "type": "MCQ", "topic": "Graph Theory", "question": "What is the maximum number of edges in a simple undirected graph with 6 vertices?", "options": ["6", "12", "15", "30"], "correct": "15"},
     {"id": 3, "type": "MCQ", "topic": "Set Theory", "question": "If set A has 3 elements, how many elements are in the power set P(A)?", "options": ["3", "6", "8", "9"], "correct": "8"}
 ]
-st.info("📋 Loaded 10 questions based strictly on your selected syllabus topics. Submit below for comprehensive grading.")
+st.info("📋 Loaded questions based strictly on your selected syllabus topics.")
 
 st.write("---")
 st.markdown("<p style='text-align: center; color: #64748b;'>Developed by MD FAZLE RABBI SOHAN | PU CSE Innovation Lab</p>", unsafe_allow_html=True)
