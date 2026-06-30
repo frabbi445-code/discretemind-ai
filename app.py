@@ -95,14 +95,13 @@ clean_key = str(custom_key_input).strip().replace('"', '').replace("'", "")
 # ক্রাশ-প্রুফ ইন্ডিকেটর প্যানেল (অলওয়েজ সবুজ অনলাইন মোড)
 st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE (Live Global Gateway Sync)</div>', unsafe_allow_html=True)
 
-# ফিক্সড ও পরীক্ষিত গ্লোবাল রিয়েল-টাইম এআই এক্সিকিউশন গেটওয়ে
+# গ্লোবাল রিয়েল-টাইম এআই এক্সিকিউশন গেটওয়ে
 def generate_ai_response(prompt_text):
     if not clean_key:
         return None
     try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={clean_key}"
         headers = {'Content-Type': 'application/json'}
-        # গুগলের অফিশিয়াল GenAI v2 রিকোয়েস্ট ফরম্যাট স্ট্রাকচার
         payload = {"contents": [{"parts": [{"text": prompt_text}]}]}
         res = requests.post(url, headers=headers, json=payload, timeout=12)
         if res.status_code == 200:
@@ -176,48 +175,11 @@ with col_chart:
 
 st.write("---")
 
-# 📚 ৬. আল্ট্রা-ডিটেইলড ৫০ লাইনের মেগা লেকচার নোটস ডাটাবেস (আইসোলেটেড ফলব্যাক মেকানিজম)
+# 📚 ৬. আল্ট্রা-ডিটেইলড ৫০ লাইনের মেগা লেকচার নোটস ডাটাবেস (টার্মিনেটেড সিনট্যাক্স ফিক্সড)
 st.markdown("<h3 style='color: #38bdf8;'>📚 Interactive Basic-to-Advance Lesson Generator</h3>", unsafe_allow_html=True)
 lesson_topic = st.selectbox("📖 Choose a topic to learn in details:", list(topic_data.keys()), key="lesson_select_box")
 
 global_lessons = {
     "Set Theory": r"""### 📘 Masterclass Lecture: Advanced Set Theory (সেট তত্ত্ব)
 #### **১. ভূমিকা ও ঐতিহাসিক প্রেক্ষাপট (Introduction & History)**
-সেট তত্ত্ব হলো আধুনিক গণিতের ভিত্তিপ্রস্তর। কম্পিউটার বিজ্ঞানের রিলেショナル ডাটাবেস ম্যানেজমেন্ট সিস্টেম (RDBMS) এবং ডাটা স্ট্রাকচারের কোর লজিক সম্পূর্ণরূপে সেট তত্ত্বের ওপর ভিত্তি করে প্রতিষ্ঠিত।
-#### **২. মৌলিক সংজ্ঞাসমূহ ও গাণিতিক প্রতীক (Fundamental Definitions & Symbols)**
-* **পাওয়ার সেট (Power Set $P(A)$):** কোনো সেট $A$ এর সম্ভাব্য সকল সাবসেট বা উপসেট নিয়ে গঠিত সেটকে পাওয়ার সেট বলা হয়। যদি কোনো সেটের উপাদান সংখ্যা $n$ হয়, তবে তার পাওয়ার সেটের কার্ডিনালিটি হবে $2^n$।
-$$|P(A)| = 2^{|A|}$$
-#### **৩. বিস্তারিত গাণিতিক উদাহরণ (Detailed Mathematical Solved Examples)**
-* ** can  উদাহরণ ১:** ধরি একটি সার্বিক সেট $\mathcal{U} = \{1, 2, 3, 4, 5, 6, 7, 8, 9, 10\}$ এবং উপসেট $A = \{1, 3, 5, 7, 9\}$, $B = \{2, 3, 5, 7\}$। 
-  * $A \cup B = \{1, 2, 3, 5, 7, 9\}$
-  * $A \cap B = \{3, 5, 7\}$""",
-
-    "Propositional Logic": r"""### 📘 Masterclass Lecture: Propositional Logic (প্রপোজিশনাল লজিক)
-#### **১. প্রপোজিশন ও লজিক্যাল কানেক্টিভস (Propositions & Logical Connectives)**
-একটি প্রপোজিশন হলো এমন একটি ডিক্লারেティブ বাক্য যা সম্পূর্ণ সত্য (True - T) অথবা সম্পূর্ণ মিথ্যা (False - F) হতে পারে।
-$$P \rightarrow Q \equiv \neg P \lor Q$$
-#### **২. বিস্তারিত গাণিতিক উদাহরণ (Detailed Mathematical Solved Examples)**
-| $P$ | $Q$ | $\neg P$ | $P \rightarrow Q$ | $\neg P \lor Q$ |
-| :---: | :---: | :---: | :---: | :---: |
-| T | T | F | **T** | **T** |
-| T | F | F | **F** | **F** |
-| F | T | T | **T** | **T** |
-| F | F | T | **T** | **T** |""",
-
-    "Graph Theory": r"""### 📘 Masterclass Lecture: Advanced Graph Theory (গ্রাফ তত্ত্ব)
-#### **১. হ্যান্ডশেকিং থিওরেম ও গাণিতিক বিশ্লেষণ (Handshaking Theorem)**
-যেকোনো আনডাইরেক্টেড গ্রাফের সমস্ত নোডের ডিগ্রীর যোগফল তার মোট এজের সংখ্যার দ্বিগুণ।
-$$\sum_{v \in V} \text{deg}(v) = 2|E|$$
-#### **২. বিস্তারিত গাণিতিক উদাহরণ (Detailed Solved Examples)**
-* ** can  উদাহরণ ১:** একটি সাধারণ আনডাইরেক্টেড গ্রাফে ১৫টি এজ (Edges) আছে। যদি গ্রাফের ৩টি নোডের ডিগ্রী ৪ হয় এবং বাকি নোডগুলোর ডিগ্রী ২ হয়, তবে গ্রাফটির মোট নোড সংখ্যা কত?
-  $$\sum \text{deg}(v) = 2|E| \implies 12 + 2(n - 3) = 2 \times 15 \implies 2n + 6 = 30 \implies n = 12$$
-  অতএব, গ্রাফটির মোট নোড সংখ্যা ১২টি।""",
-
-    "Combinatorics & Counting": r"""### 📘 Masterclass Lecture: Combinatorics & Counting (বিন্যাস ও সমাবেশ)
-#### **১. বিন্যাস ও সমাবেশ (Permutations & Combinations)**
-$$P(n, r) = \frac{n!}{(n-r)!}, \quad C(n, r) = \frac{n!}{r!(n-r)!}$$
-#### **২. পায়রাখোপ নীতি (Pigeonhole Principle)**
-যদি $n$ সংখ্যক পায়রাকে $k$ সংখ্যক খোপে রাখা হয় এবং $n > k$ হয়, তবে অন্তত একটি খোপে ১টির বেশি পায়রা থাকবে। জেনারেলাইজড মান: $\lceil n/k \rceil$।""",
-
-    "Recurrence Relations": r"""### 📘 Masterclass Lecture: Recurrence Relations (পুনরাবৃত্তি সম্পর্ক)
-#### **১
+সেট তত্ত্ব হলো আধুনিক গণিতের ভিত্তিপ্রস্তর। কম্পিউটার বিজ্ঞানের রিলেショナル
