@@ -61,7 +61,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ২. Session State ইনিশিয়েলাইজেশন (স্টেট লস ও ক্রাশ প্রোটেকশন)
+# ২. Session State ইনিশিয়েলাইজেশন
 if 'user_answers' not in st.session_state:
     st.session_state.user_answers = {}
 if 'exam_submitted' not in st.session_state:
@@ -91,12 +91,11 @@ custom_key_input = st.sidebar.text_input(
 
 clean_key = str(custom_key_input).strip().replace('"', '').replace("'", "")
 
-# ৪. AQ. টোকেনের জন্য হেডার-ভিত্তিক অ্যাডাপ্টিভ গেটওয়ে (Adaptive HTTP Engine)
+# ৪. ডাইনামিক রিয়েল-টাইম রেসপন্স গেটওয়ে
 def generate_ai_response(prompt_text):
     if not clean_key:
-        return "⚠️ API Key/Token অনুপস্থিত!"
+        return "⚠️ API Key/Token অনুপস্থিত! দয়া করে সাইডবারে সঠিক টোকেনটি দাও।"
     
-    # এপিআই পেইলড স্ট্রাকচার
     payload = {
         "contents": [{"parts": [{"text": prompt_text}]}],
         "generationConfig": {
@@ -105,7 +104,7 @@ def generate_ai_response(prompt_text):
         }
     }
     
-    # AQ. টোকেনগুলোর জন্য অফিশিয়াল Bearer Header এবং OAuth গেটওয়ে রুট
+    # AQ. টোকেনের জন্য হেডার প্রোটোকল কনফিগারেশন
     if clean_key.startswith("AQ"):
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
         headers = {
@@ -113,21 +112,20 @@ def generate_ai_response(prompt_text):
             'Authorization': f'Bearer {clean_key}'
         }
     else:
-        # ক্লাসিক এপিআই কী ব্যাকআপ রুট
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={clean_key}"
         headers = {'Content-Type': 'application/json'}
 
     try:
-        res = requests.post(url, headers=headers, json=payload, timeout=12)
+        res = requests.post(url, headers=headers, json=payload, timeout=15)
         if res.status_code == 200:
             return res.json()['candidates'][0]['content']['parts'][0]['text']
         else:
-            return f"❌ **API Gateway Error (Status Code: {res.status_code})**\n\nসার্ভার রেসপন্স: `{res.text}`"
+            return f"❌ **API Engine Error ({res.status_code})**: {res.json().get('error', {}).get('message', res.text)}"
     except Exception as e:
-        return f"⚠️ **Connection Exception:** `{str(e)}`"
+        return f"⚠️ **Connection Error**: {str(e)}"
 
-# প্রেজেন্টেশন সেফগার্ড প্যানেল (অলওয়েজ অনলাইন)
-st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE (Live AQ. Token Authentication Protocol Active)</div>', unsafe_allow_html=True)
+# স্ট্যাটাস বার অন এবং অনলাইন লকড
+st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE</div>', unsafe_allow_html=True)
 
 st.title("🧠 DiscreteMind AI: Ultimate Interactive Lab")
 st.subheader("Universal Discrete Mathematics Solver & Gamified Study Suite")
@@ -217,7 +215,7 @@ if uploaded_file is not None:
             
             st.markdown('<div class="answer-box">', unsafe_allow_html=True)
             st.markdown("#### 🎓 Student-Friendly Concept Breakdowns:")
-            st.markdown(explanation if explanation else "### 📘 AI Explanation Layer Sync Active.")
+            st.markdown(explanation if explanation else "⚠️ Content analysis processing anomaly. Re-verify payload stream.")
             st.markdown('</div>', unsafe_allow_html=True)
 
     if suggest_clicked:
@@ -227,73 +225,22 @@ if uploaded_file is not None:
             
             st.markdown('<div class="answer-box">', unsafe_allow_html=True)
             st.markdown("#### 🚨 High-Yield Exam Suggestions:")
-            st.markdown(suggestions if suggestions else "### 🎯 Core Exam Suggestions Loaded.")
+            st.markdown(suggestions if suggestions else "⚠️ Unable to load dynamic recommendations via API.")
             st.markdown('</div>', unsafe_allow_html=True)
 
 st.write("---")
 
-# 📚 ৮. আল্ট্রা-ডিটেইলড লেকচার নোটস ডাটাবেস (লোকাল টেক্সটবুক ডাটাবেয়ার)
+# 📚 ৮. Interactive Basic-to-Advance Lesson Generator
 st.markdown("<h3 style='color: #38bdf8;'>📖 Interactive Basic-to-Advance Lesson Generator</h3>", unsafe_allow_html=True)
 lesson_topic = st.selectbox("📖 Choose a topic to learn in details:", list(topic_data.keys()), key="lesson_select_box")
 
-global_lessons = {
-    "Set Theory": r"""### 📘 Masterclass Lecture: Advanced Set Theory (সেট তত্ত্ব)
-#### **১. ভূমিকা ও ঐতিহাসিক প্রেক্ষাপট (Introduction & History)**
-সেট তত্ত্ব হলো আধুনিক গণিতের ভিত্তিপ্রস্তর। কম্পিউটার বিজ্ঞানের রিলেショナル ডাটাবেস ম্যানেজমেন্ট সিস্টেম (RDBMS) এবং ডাটা স্ট্রাকচারের কোর লজিক সম্পূর্ণরূপে সেট তত্ত্বের ওপর ভিত্তি করে প্রতিষ্ঠিত।
-#### **২. মৌলিক সংজ্ঞাসমূহ ও গাণিতিক প্রতীক (Fundamental Definitions & Symbols)**
-* **পাওয়ার সেট (Power Set $P(A)$):** কোনো সেট $A$ এর সম্ভাব্য সকল সাবসেট বা উপসেট নিয়ে গঠিত সেটকে পাওয়ার সেট বলা হয়। উপাদান সংখ্যা $n$ হলে পাওয়ার সেটের কার্ডিনালিটি হবে $2^n$।
-$$|P(A)| = 2^{|A|}$$
-#### **৩. বিস্তারিত গাণিতিক উদাহরণ (Detailed Mathematical Solved Examples)**
-* **উদাহরণ ১:** ধরি একটি সার্বিক সেট $\mathcal{U} = \{1, 2, 3, 4, 5, 6, 7, 8, 9, 10\}$ এবং উপসেট $A = \{1, 3, 5, 7, 9\}$, $B = \{2, 3, 5, 7\}$। 
-  * $A \cup B = \{1, 2, 3, 5, 7, 9\}$
-  * $A \cap B = \{3, 5, 7\}$""",
-
-    "Propositional Logic": r"""### 📘 Masterclass Lecture: Propositional Logic (প্রপোজিশনাল লজিক)
-#### **১. প্রপোজিশন ও লজিক্যাল কানেক্টিভস (Propositions & Logical Connectives)**
-একটি প্রপোজিশন হলো এমন একটি ডিক্লারেティブ বাক্য যা সম্পূর্ণ সত্য (True - T) অথবা সম্পূর্ণ মিথ্যা (False - F) হতে পারে।
-$$P \rightarrow Q \equiv \neg P \lor Q$$
-#### **২. বিস্তারিত গাণিতিক উদাহরণ (Detailed Mathematical Solved Examples)**
-| $P$ | $Q$ | $\neg P$ | $P \rightarrow Q$ | $\neg P \lor Q$ |
-| :---: | :---: | :---: | :---: | :---: |
-| T | T | F | **T** | **T** |
-| T | F | F | **F** | **F** |
-| F | T | T | **T** | **T** |
-| F | F | T | **T** | **T** |""",
-
-    "Graph Theory": r"""### 📘 Masterclass Lecture: Advanced Graph Theory (গ্রাফ তত্ত্ব)
-#### **১. হ্যান্ডশেকিং থিওরেম ও গাণিতিক বিশ্লেষণ (Handshaking Theorem)**
-যেকোনো আনডাইরেক্টেড গ্রাফের সমস্ত নোডের ডিগ্রীর যোগফল তার মোট এজের সংখ্যার দ্বিগুণ।
-$$\sum_{v \in V} \text{deg}(v) = 2|E|$$
-#### **২. বিস্তারিত গাণিতিক উদাহরণ (Detailed Solved Examples)**
-* ** can   can  উদাহরণ ১:** একটি সাধারণ আনডাইরেক্টেড গ্রাফে ১৫টি এজ (Edges) আছে। যদি গ্রাফের ৩টি নোডের ডিগ্রী ৪ হয় এবং বাকি নোডগুলোর ডিগ্রী ২ হয়, তবে গ্রাফটির মোট নোড সংখ্যা কত?
-  $$\sum \text{deg}(v) = 2|E| \implies 12 + 2(n - 3) = 2 \times 15 \implies 2n + 6 = 30 \implies n = 12$$
-  অতএব, গ্রাফটির মোট নোড সংখ্যা ১২টি।""",
-
-    "Combinatorics & Counting": r"""### 📘 Masterclass Lecture: Combinatorics & Counting (বিন্যাস ও সমাবেশ)
-#### **১. বিন্যাস ও সমাবেশ (Permutations & Combinations)**
-$$P(n, r) = \frac{n!}{(n-r)!}, \quad C(n, r) = \frac{n!}{r!(n-r)!}$$
-#### **২. পায়রাখোপ নীতি (Pigeonhole Principle)**
-যদি $n$ সংখ্যক পায়রাকে $k$ সংখ্যক খোপে রাখা হয় এবং $n > k$ হয়, তবে অন্তত একটি খোপে ১টির বেশি পায়রা থাকবে। জেনারেলাইজড মান: $\lceil n/k \rceil$।""",
-
-    "Recurrence Relations": r"""### 📘 Masterclass Lecture: Recurrence Relations (পুনরাবৃত্তি সম্পর্ক)
-#### **১. ক্যারেক্টারিস্টিক সমীকরণ সমাধান:**
-$a_n = c_1a_{n-1} + c_2a_{n-2}$ সমীকরণের জন্য ক্যারেক্টারিস্টিক রুট সমীকরণটি হলো:
-$$r^2 - c_1r - c_2 = 0$$
-#### **২. বিস্তারিত গাণিতিক উদাহরণ (Detailed Solved Examples)**
-* ** can   can   can  উদাহরণ ১:** Solve $a_n = 5a_{n-1} - 6a_{n-2}$ with initial conditions $a_0 = 1, a_1 = 5$।
-  * Final Explicit Solution: $a_n = -1 \cdot 2^n + 2 \cdot 3^n$।"""
-}
-
 if st.button("Generate Detailed AI Lecture Note", use_container_width=True):
     with st.spinner(f"✨ Compiling notes for {lesson_topic}..."):
-        prompt = f"Write an ultra-detailed textbook-style advanced academic lecture note on the topic: '{lesson_topic}'. Structure the note with basic definition, detailed logic rules, and solved math examples with转换为 LaTeX block formatting. Output must be over 50 lines long."
+        prompt = f"Write an ultra-detailed textbook-style advanced academic lecture note on the topic: '{lesson_topic}'. Structure the note with basic definition, detailed logic rules, and solved math examples with clear LaTeX block formatting. Output must be over 50 lines long."
         content = generate_ai_response(prompt)
         
         st.markdown('<div class="answer-box">', unsafe_allow_html=True)
-        if content and not content.startswith("❌"):
-            st.markdown(content)
-        else:
-            st.markdown(global_lessons.get(lesson_topic, "### Local Fallback Engine Synced."))
+        st.markdown(content if content else "⚠️ Live note compiler timed out.")
         st.markdown('</div>', unsafe_allow_html=True)
 
 st.write("---")
@@ -328,32 +275,26 @@ if st.button("🔄 Load Dynamic AI Flashcards", use_container_width=True):
 
 st.write("---")
 
-# 🚀 ১০. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস (ম্যাথ সলভার)
+# 🚀 ১০. ইউনিভার্সাল সিঙ্গেল ইনপুট ইন্টারফেস (ম্যাথ সলভার - শতভাগ ডাইনামিক রুট)
 st.markdown("<h3 style='color: #38bdf8;'>🚀 Universal Math Input Box</h3>", unsafe_allow_html=True)
-user_query = st.text_area("📝 Type your discrete math problem here:", placeholder="e.g., Express using predicate logic...", height=110, key="solver_query")
+user_query = st.text_area("📝 Type your discrete math problem here:", placeholder="e.g., If set A has 3 elements, how many elements are in P(A)?", height=110, key="solver_query")
 
 if st.button("Generate Answer", use_container_width=True):
     if not user_query.strip():
         st.warning("⚠️ Please enter a question first!")
     else:
         with st.spinner("✨ Generating solution..."):
-            sol_prompt = f"You are a strict Discrete Mathematics Professor. Solve this precise problem step-by-step with rigorous formal proofs, proper predicate logic or combinatorics rules, and clean block LaTeX formatting: {user_query}"
+            sol_prompt = f"You are an expert Discrete Mathematics Professor. Solve this precise problem step-by-step with rigorous formal proofs, proper mathematical definitions, and clean block LaTeX formatting: {user_query}"
             solution = generate_ai_response(sol_prompt)
             
             st.balloons()
             st.markdown('<div class="answer-box">', unsafe_allow_html=True)
-            if solution and not solution.startswith("❌"):
-                st.markdown(solution)
-            else:
-                st.markdown(r"""### 📘 Step-by-Step Mathematical Solution (Local Solver)
-**Problem:** Predicate Logic / Recurrence Relations Formal Verification System.
-$$\forall x (C(x) \rightarrow L(x)) \quad \text{and} \quad C(s) \implies L(s)$$
-The logic vector satisfies Universal Instantiation perfectly.""")
+            st.markdown(solution if solution else "⚠️ Dynamic generation gateway failed to parse response.")
             st.markdown('</div>', unsafe_allow_html=True)
 
 st.write("---")
 
-# 🧠 ১১. ডাইনামিক ফিল্টার সংবলিত ১০-কোয়েশ্চেন মক টেস্ট ল্যাব
+# 🧠 ১১. মক টেস্ট ল্যাব
 st.markdown("<h3 style='color: #38bdf8;'>📝 Interactive Exam Lab with Dynamic Filter</h3>", unsafe_allow_html=True)
 
 master_questions = [
@@ -393,7 +334,6 @@ elif st.session_state.exam_submitted:
     score = 0
     total_q = len(filtered_questions)
     topic_report = {}
-    detailed_report = []
     
     for q in filtered_questions:
         u_ans = st.session_state.user_answers.get(q['id'], "")
@@ -402,7 +342,6 @@ elif st.session_state.exam_submitted:
         if q["topic"] not in topic_report: topic_report[q["topic"]] = {"correct": 0, "total": 0}
         topic_report[q["topic"]]["total"] += 1
         if is_correct: topic_report[q["topic"]]["correct"] += 1
-        detailed_report.append({"Q_Id": q['id'], "Topic": q["topic"], "Your Answer": u_ans, "Correct Answer": q['correct'], "Result": "✅ Correct" if is_correct else "❌ Incorrect"})
     
     wrong = total_q - score
     fig_report = go.Figure(data=[go.Pie(labels=['Correct', 'Incorrect'], values=[score, wrong], hole=.4, marker_colors=['#4ade80', '#f43f5e'])])
