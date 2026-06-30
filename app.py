@@ -62,7 +62,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ২. Session State ইনিশিয়েলাইজেশন (স্টেট লস ও রিসেট প্রটেকশন লেয়ার)
+# ২. Session State ইনিশিয়েলাইজেশন (স্টেট লস প্রোটেকশন)
 if 'user_answers' not in st.session_state:
     st.session_state.user_answers = {}
 if 'exam_submitted' not in st.session_state:
@@ -90,16 +90,42 @@ custom_key_input = st.sidebar.text_input(
 
 clean_key = str(custom_key_input).strip().replace('"', '').replace("'", "")
 
-# ৪. এপিআই ইঞ্জিন রাউটার
-try:
-    if clean_key:
-        genai.configure(api_key=clean_key)
-        model = genai.GenerativeModel('gemini-1.0-pro')
-except Exception:
-    pass
+# ৪. লাইভ হার্টবিট চেক লজিক (True Connection Status Engine)
+ai_live_connected = False
+api_diagnostic_msg = ""
+
+if clean_key:
+    # ব্যাকএন্ডে গুগলের এন্ডপয়েন্টে একটা রিয়েল-টাইম লাইভ টেস্ট রিকোয়েস্ট পাঠানো হচ্ছে
+    test_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent"
+    test_headers = {'Content-Type': 'application/json'}
+    if clean_key.startswith("AQ"):
+        test_headers['Authorization'] = f'Bearer {clean_key}'
+    else:
+        test_url += f"?key={clean_key}"
+        
+    test_payload = {"contents": [{"parts": [{"text": "Ping"}]}]}
+    try:
+        test_res = requests.post(test_url, headers=test_headers, json=test_payload, timeout=4)
+        if test_res.status_code == 200:
+            ai_live_connected = True
+            try:
+                genai.configure(api_key=clean_key)
+                model = genai.GenerativeModel('gemini-1.0-pro')
+            except Exception:
+                pass
+        else:
+            api_diagnostic_msg = f"Error {test_res.status_code}: Token Expired or Credentials Invalid."
+    except Exception as e:
+        api_diagnostic_msg = "Network Gateway Timeout."
+
+# ট্রু-কানেকশন ডাইনামিক স্ট্যাটাস প্যানেল রেন্ডারিং
+if ai_live_connected:
+    st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE (Live Global Sync Active)</div>', unsafe_allow_html=True)
+else:
+    st.markdown(f'<div class="status-panel" style="background-color: rgba(244, 63, 94, 0.1); border: 1px solid #f43f5e; color: #f43f5e !important;">🔴 Core AI Engine: OFFLINE ({api_diagnostic_msg if api_diagnostic_msg else "Token Validation Pending"})</div>', unsafe_allow_html=True)
 
 def generate_ai_response(prompt_text):
-    if not clean_key:
+    if not ai_live_connected:
         return None
     
     payload = {
@@ -115,14 +141,12 @@ def generate_ai_response(prompt_text):
         else:
             url += f"?key={clean_key}"
             
-        res = requests.post(url, headers=headers, json=payload, timeout=5)
+        res = requests.post(url, headers=headers, json=payload, timeout=10)
         if res.status_code == 200:
             return res.json()['candidates'][0]['content']['parts'][0]['text']
     except Exception:
         return None
     return None
-
-st.markdown('<div class="status-panel" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; color: #4ade80 !important;">🟢 Core AI Engine: CONNECTED & ONLINE (Live Cloud Channel Sync)</div>', unsafe_allow_html=True)
 
 st.title("🧠 DiscreteMind AI: Ultimate Interactive Lab")
 st.subheader("Universal Discrete Mathematics Solver & Gamified Study Suite")
@@ -189,7 +213,7 @@ with col_chart:
 
 st.write("---")
 
-# 📚 ⑦. AI Lecture Slide Analyzer & Suggestion Engine
+# 📚 ⑦. AI Lecture Slide Analyzer & Suggestion Engine (রেফারেন্স বুক সংযোজন)
 st.markdown("<h3 style='color: #38bdf8;'>📚 AI Lecture Slide Analyzer & Suggestion Engine</h3>", unsafe_allow_html=True)
 uploaded_file = st.file_uploader("📂 Choose a Lecture Slide File:", type=["txt", "pdf"])
 
@@ -208,7 +232,11 @@ if uploaded_file is not None:
                 explanation = r"""### 📘 Slide Analysis & Concept Breakdown
 * **Core Topic:** First-Order Predicate Logic & Structural Quantifiers ($\forall, \exists$).
 * **Detailed Explanation:** এই স্লাইডটি গাণিতিক যুক্তির মূল ভিত্তি আলোচনা করে। কীভাবে সাধারণ বাক্যকে ইউনিভার্সাল কোয়ান্টিফায়ার ($\forall$) এবং এক্সিস্টেনশিয়াল কোয়ান্টিফায়ার ($\exists$) ব্যবহার করে গাণিতিক সমীকরণে রূপান্তর করা যায়, তা এখানে ধাপে ধাপে দেখানো হয়েছে।
-* **Key Focus Area:** কম্পিউটার সায়েন্সের অ্যালগরিদম ডিজাইন, এআই নলেজ রিপ্রেজেন্টেশন এবং কোড ভ্যালিডেশনে এই লজিকের গুরুত্ব অপরিসীম।"""
+
+---
+#### 📖 Standard Textbook Reference:
+* **Book:** *Discrete Mathematics and Its Applications* by Kenneth H. Rosen (7th Edition).
+* **Reference Link:** [Open Access Textbook Resources](https://www.mheducation.com)"""
             st.markdown('<div class="answer-box">', unsafe_allow_html=True)
             st.markdown(explanation)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -220,7 +248,11 @@ if uploaded_file is not None:
                 suggestions = r"""### 🎯 High-Yield Exam Suggestions (Syllabus Synchronized)
 1. **Universal Instantiation Proofs:** এই অধ্যায় থেকে একটি ফরমাল প্রুফ সিকোয়েন্স ফাইনাল সেমিস্টার পরীক্ষায় আসার সম্ভাবনা ৯৫%।
 2. **Quantifier Negation:** $\neg \forall x P(x) \equiv \exists x \neg P(x)$ এর রূপান্তর বিধিটি অবশ্যই দেখে রাখবে।
-3. **Professor's Tip:** পরীক্ষায় ভালো করার জন্য স্লাইডে উল্লেখিত মডাস পনেন্স ($Modus Ponens$) এবং মডাস টলেন্স ($Modus Tollens$) এর গাণিতিক উদাহরণগুলো বারবার প্র্যাকটিস করার পরামর্শ দেওয়া হচ্ছে।"""
+
+---
+#### 📖 Suggested Reading Mapping:
+* **Book:** *Discrete Mathematics* by Seymour Lipschutz (Schaum's Outlines).
+* **Reference Link:** [McGraw-Hill Education Portal](https://www.mheducation.com)"""
             st.markdown('<div class="answer-box">', unsafe_allow_html=True)
             st.markdown(suggestions)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -233,29 +265,48 @@ lesson_topic = st.selectbox("📖 Choose a topic to learn in details:", list(top
 
 global_lessons = {
     "Set Theory": r"""### 📘 Masterclass Lecture: Advanced Set Theory (সেট তত্ত্ব)
-* **Definition:** অবিন্যস্ত বা বিন্যস্ত বস্তুর সুনির্দিষ্ট সংগ্রহকে সেট বলা হয়। কম্পিউটার বিজ্ঞানের রিলেショナル ডাটাবেস ম্যানেজমেন্ট সিস্টেম (RDBMS) সম্পূর্ণরূপে সেট তত্ত্বের ওপর ভিত্তি করে প্রতিষ্ঠিত।
 * **Power Set $P(A)$:** কোনো সেট $A$ এর সম্ভাব্য সকল সাবসেট নিয়ে গঠিত সেট। উপাদান সংখ্যা $n$ হলে পাওয়ার সেটের কার্ডিনালিটি হবে $2^n$।
 $$|P(A)| = 2^{|A|}$$
-* **Solved Example:** ধরি সার্বিক সেট $\mathcal{U} = \{1, 2, 3, 4, 5, 6, 7, 8, 9, 10\}$ এবং উপসেট $A = \{1, 3, 5, 7, 9\}$, $B = \{2, 3, 5, 7\}$। 
-  * $A \cup B = \{1, 2, 3, 5, 7, 9\}$
-  * $A \cap B = \{3, 5, 7\}$""",
+
+---
+#### 📖 Textbook Reference:
+* **Book:** *Discrete Mathematics and Its Applications* by Kenneth H. Rosen (Chapter 2: Sets & Functions).
+* **Portal Link:** [Google Books Rosen Entry](https://books.google.com)""",
     "Propositional Logic": r"""### 📘 Masterclass Lecture: Propositional Logic (প্রপোজিশনাল লজিক)
-* **Core Concept:** প্রপোজিশন হলো এমন বাক্য যা সম্পূর্ণ সত্য অথবা সম্পূর্ণ মিথ্যা। বুলিয়ান অ্যালজেব্রা এবং ডিজিটাল লজিক সার্কিট ডিজাইনে এর ব্যবহার অপরিসীম।
-* **Logical Equivalence:** $$P \rightarrow Q \equiv \neg P \lor Q$$""",
+* **Logical Equivalence:** $$P \rightarrow Q \equiv \neg P \lor Q$$
+
+---
+#### 📖 Textbook Reference:
+* **Book:** *Discrete Mathematics and Its Applications* by Kenneth H. Rosen (Chapter 1: Logic and Proofs).
+* **Portal Link:** [Google Books Rosen Entry](https://books.google.com)""",
     "Graph Theory": r"""### 📘 Masterclass Lecture: Advanced Graph Theory (গ্রাফ তত্ত্ব)
-* **Handshaking Theorem:** যেকোনো আনডাইরেক্টেড গ্রাফের সমস্ত নোডের ডিগ্রীর যোগফল তার মোট এজের সংখ্যার দ্বিগুণ।
-$$\sum_{v \in V} \text{deg}(v) = 2|E|$$""",
+* **Handshaking Theorem:** $$\sum_{v \in V} \text{deg}(v) = 2|E|$$
+
+---
+#### 📖 Textbook Reference:
+* **Book:** *Introduction to Graph Theory* by Douglas B. West.
+* **Portal Link:** [Douglas West Graph Theory Index](https://math.uiuc.edu)""",
     "Combinatorics & Counting": r"""### 📘 Masterclass Lecture: Combinatorics & Counting (বিন্যাস ও সমাবেশ)
 * **Permutations & Combinations Formula:**
-$$P(n, r) = \frac{n!}{(n-r)!}, \quad C(n, r) = \frac{n!}{r!(n-r)!}$$""",
+$$P(n, r) = \frac{n!}{(n-r)!}, \quad C(n, r) = \frac{n!}{r!(n-r)!}$$
+
+---
+#### 📖 Textbook Reference:
+* **Book:** *Introductory Combinatorics* by Richard A. Brualdi.
+* **Portal Link:** [Brualdi Combinatorics Guide](https://www.pearson.com)""",
     "Recurrence Relations": r"""### 📘 Masterclass Lecture: Recurrence Relations (পুনরাবৃত্তি সম্পর্ক)
 * **Characteristic Equation:** $a_n = c_1a_{n-1} + c_2a_{n-2}$ এর সমাধান সমীকরণ:
-$$r^2 - c_1r - c_2 = 0$$"""
+$$r^2 - c_1r - c_2 = 0$$
+
+---
+#### 📖 Textbook Reference:
+* **Book:** *Discrete Mathematics and Its Applications* by Kenneth H. Rosen (Chapter 8).
+* **Portal Link:** [Google Books Rosen Entry](https://books.google.com)"""
 }
 
 if st.button("Generate Detailed AI Lecture Note", use_container_width=True):
     with st.spinner(f"✨ Compiling notes for {lesson_topic}..."):
-        content = generate_ai_response(f"Write a 50 line lecture note on: {lesson_topic}")
+        content = generate_ai_response(f"Write a 50 line lecture note with textbook reference book name and official link at the end for: {lesson_topic}")
         if not content:
             content = global_lessons.get(lesson_topic, "### Data Layer Ready.")
         st.markdown('<div class="answer-box">', unsafe_allow_html=True)
@@ -312,51 +363,42 @@ if st.button("Generate Answer", use_container_width=True):
 
 **Problem:** If set $A$ has $3$ elements, how many elements are in the power set $P(A)$?
 
-#### **Step 1: Understand the Power Set Definition**
-The power set $P(A)$ of a set $A$ is the set of all possible subsets of $A$. 
-
-#### **Step 2: Apply the Cardinality Formula**
-If a finite set $A$ has $n$ elements, the total number of subsets (and thus the cardinality of the power set) is calculated using the exponential base-2 formula:
+#### **Step 1: Apply the Cardinality Formula**
+If a finite set $A$ has $n$ elements, the total number of subsets (and thus the cardinality of the power set) is:
 $$|P(A)| = 2^n$$
 
-#### **Step 3: Calculate the Final Valuation**
-Given that the number of elements in set $A$ is $n = 3$:
-$$|P(A)| = 2^3 = 2 \times 2 \times 2 = 8$$
+#### **Step 2: Calculate Final Value**
+Given $n = 3$:
+$$|P(A)| = 2^3 = 8$$
 
 #### **🎯 Final Answer:**
-The power set $P(A)$ contains **$8$ elements**. Any sample set like $A = \{1, 2, 3\}$ will yield exactly 8 subsets: $\{\emptyset, \{1\}, \{2\}, \{3\}, \{1,2\}, \{1,3\}, \{2,3\}, \{1,2,3\}\}$."""
+The power set $P(A)$ contains **$8$ elements**."""
                 
                 elif "predicate" in q_lower or "student" in q_lower or "sohan" in q_lower:
                     solution = r"""### 📘 Step-by-Step Mathematical Proof (Predicate Logic)
 
-**Problem Formulation:** Every Computer Science student at Presidency University loves coding. Sohan is a Computer Science student at Presidency University. Prove: Sohan loves coding.
+**Problem Formulation:** Every CS student loves coding. Sohan is a CS student. Prove: Sohan loves coding.
 
-#### **Step 1: Define Predicates and Constants**
-* Let $C(x)$: "$x$ is a Computer Science student at Presidency University."
+#### **Step 1: Formal Logical Translation**
+* Let $C(x)$: "$x$ is a CS student."
 * Let $L(x)$: "$x$ loves coding."
-* Let $s$: "Sohan" (a specific individual).
-
-#### **Step 2: Formal Logical Translation**
+* Let $s$: "Sohan".
 * **Premise 1:** $\forall x (C(x) \rightarrow L(x))$
 * **Premise 2:** $C(s)$
-* **Target Conclusion:** $L(s)$
 
-#### **Step 3: Formal Mathematical Proof Sequence**
+#### **Step 2: Formal Mathematical Proof Sequence**
 1. $\forall x (C(x) \rightarrow L(x))$ — Given (Premise 1)
 2. $C(s) \rightarrow L(s)$ — Universal Instantiation (UI) applied to step 1 for constant $s$.
 3. $C(s)$ — Given (Premise 2)
 4. $L(s)$ — Modus Ponens (MP) applied to steps 2 and 3.
 
 #### **🎯 Final Resolution Status:**
-The logical deduction structure evaluates perfectly. The argument is **Valid**."""
+The argument is **Valid**."""
                 else:
                     solution = r"""### 📘 Step-by-Step Mathematical Solution
-
 **Problem:** Solve the linear homogeneous recurrence relation $a_n = 5a_{n-1} - 6a_{n-2}$ with $a_0 = 1, a_1 = 5$.
-
 #### **Step 1: Formulate the Characteristic Equation**
 $$r^2 - 5r + 6 = 0 \implies (r-2)(r-3) = 0 \implies r_1 = 2, \quad r_2 = 3$$
-
 #### **🎯 Final Explicit Formula:**
 $$a_n = -1 \cdot 2^n + 2 \cdot 3^n$$"""
             st.balloons()
@@ -366,7 +408,7 @@ $$a_n = -1 \cdot 2^n + 2 \cdot 3^n$$"""
 
 st.write("---")
 
-# 🧠 ১১. মক টেস্ট ল্যাব (শতভাগ ফিক্সড ও ডাইনামিক ফিল্টার কমপ্লায়েন্ট)
+# 🧠 ১১. মক টেস্ট ল্যাব (১০টি হাই-কোয়ালিটি মিশ্র প্রশ্ন সংবলিত মেগা ল্যাব)
 st.markdown("<h3 style='color: #38bdf8;'>📝 Interactive Exam Lab with Dynamic Filter</h3>", unsafe_allow_html=True)
 
 master_questions = [
@@ -374,20 +416,22 @@ master_questions = [
     {"id": 2, "type": "MATH", "topic": "Combinatorics & Counting", "question": "Find the number of distinct permutations of the letters in the word 'PUCSE'.", "correct": "120"},
     {"id": 3, "type": "MCQ", "topic": "Set Theory", "question": "If set A has 3 elements, how many elements are in the power set P(A)?", "options": ["3", "6", "8", "9"], "correct": "8"},
     {"id": 4, "type": "MATH", "topic": "Propositional Logic", "question": "How many rows will a truth table have for a proposition containing 4 distinct variables?", "correct": "16"},
-    {"id": 5, "type": "MCQ", "topic": "Propositional Logic", "question": "P -> Q is logically equivalent to which statement?", "options": ["~P \/ Q", "P /\ ~Q", "~Q -> P", "P \/ Q"], "correct": "~P \/ Q"}
+    {"id": 5, "type": "MCQ", "topic": "Propositional Logic", "question": "P -> Q is logically equivalent to which statement?", "options": ["~P \/ Q", "P /\ ~Q", "~Q -> P", "P \/ Q"], "correct": "~P \/ Q"},
+    {"id": 6, "type": "MCQ", "topic": "Set Theory", "question": "What is the cardinality of the empty set power set P(P(empty_set))?", "options": ["0", "1", "2", "4"], "correct": "2"},
+    {"id": 7, "type": "MATH", "topic": "Combinatorics & Counting", "question": "How many bit strings of length 4 either start with a 1 bit or end with 0?", "correct": "12"},
+    {"id": 8, "type": "MCQ", "topic": "Graph Theory", "question": "A graph with no cycles is called what?", "options": ["Bipartite", "Tree/Acyclic", "Complete", "Eulerian"], "correct": "Tree/Acyclic"},
+    {"id": 9, "type": "MATH", "topic": "Recurrence Relations", "question": "Find the next term in the sequence defined by a_n = 2a_{n-1} + 1 with a_0 = 1.", "correct": "3"},
+    {"id": 10, "type": "MCQ", "topic": "Recurrence Relations", "question": "The Fibonacci sequence is defined by which recurrence order?", "options": ["First Order", "Second Order", "Third Order", "None"], "correct": "Second Order"}
 ]
 
-# সেশন স্টেট থেকে সংরক্ষিত সিলেক্টেড টপিক ফিল্টারিং
 filtered_questions = [q for q in master_questions if q["topic"] in st.session_state.selected_topics]
 if not filtered_questions:
     filtered_questions = master_questions
 
-# কুইজ যদি সাবমিট করা না হয়ে থাকে
 if not st.session_state.exam_submitted:
     with st.form("dynamic_exam_form_filtered"):
-        st.info(f"📋 Loaded {len(filtered_questions)} questions based strictly on your selected syllabus topics.")
+        st.info(f"📋 Loaded {len(filtered_questions)} high-yield questions based strictly on your selected syllabus topics.")
         
-        # ডাইনামিকালি প্রশ্ন রেন্ডার করা
         for idx, q in enumerate(filtered_questions):
             st.markdown(f"##### **Question {idx+1} [{q['topic']}]: {q['question']}**")
             if q['type'] == "MCQ":
@@ -396,11 +440,10 @@ if not st.session_state.exam_submitted:
                 st.session_state.user_answers[q['id']] = st.text_input("Type final answer:", key=f"f_quiz_math_{q['id']}_{idx}").strip()
             st.write("---")
             
-        if st.form_submit_button("📤 Submit 5-Question Test"):
+        if st.form_submit_button("📤 Submit 10-Question Comprehensive Test"):
             st.session_state.exam_submitted = True
             st.rerun()
 
-# কুইজ সাবমিট হলে রিপোর্ট কার্ড ও এনালাইটিক্স দেখানো
 elif st.session_state.exam_submitted:
     st.success("🎯 Evaluation Completed successfully for Selected Topics!")
     score = 0
